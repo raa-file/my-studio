@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ريم الحربي | إدارة الطلبات</title>
+<title>my studio | إدارة الطلبات</title>
 <meta name="theme-color" content="#FFFFFF">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ريم الحربي">
+<meta name="apple-mobile-web-app-title" content="my studio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Poppins:wght@400;500&display=swap">
@@ -29,6 +29,7 @@
   --s-revisions:#B4232F; --s-revisions-bg:#FBE6E8;
   --s-ready:#127068; --s-ready-bg:#DDF3F0;
   --s-done:#4C6157; --s-done-bg:#E6ECE9;
+  --s-cancelled:#7A7377; --s-cancelled-bg:#EEEAEC;
   --demo:#7A5A00; --demo-bg:#FFF6CC;
   --shadow:0 1px 2px rgba(60,20,40,.05),0 4px 14px rgba(60,20,40,.04);
   --font-display:"Ocean Brush","Readex Pro",system-ui,sans-serif;
@@ -45,7 +46,7 @@
     --s-new:#8FB2F2; --s-new-bg:#1E2A42; --s-progress:#F2B65C; --s-progress-bg:#3A2D17;
     --s-preview:#C2A6F2; --s-preview-bg:#2C2340; --s-reply:#F4A27E; --s-reply-bg:#3D2619;
     --s-revisions:#F08A92; --s-revisions-bg:#3A1F22; --s-ready:#6FD1C5; --s-ready-bg:#16332F;
-    --s-done:#A9BDB3; --s-done-bg:#25302C; --demo:#F2D36B; --demo-bg:#3A3215;
+    --s-done:#A9BDB3; --s-done-bg:#25302C; --s-cancelled:#B3A9AE; --s-cancelled-bg:#2E2729; --demo:#F2D36B; --demo-bg:#3A3215;
     --shadow:0 1px 2px rgba(0,0,0,.3);
     color-scheme:dark;
   }
@@ -71,7 +72,7 @@ a{color:var(--accent)}
 .side .brand{align-self:flex-start;margin:0 10px 16px!important}
 .side{display:none}
 main{padding:16px max(16px,env(safe-area-inset-right,0px)) calc(var(--tabbar-h) + 90px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));max-width:1180px;margin-inline:auto}
-.tabbar{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
+.tabbar{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:0;background:none;color:var(--muted);font-size:11.5px;text-decoration:none;border-radius:10px}
 .tab svg{width:22px;height:22px}
@@ -139,6 +140,8 @@ h3{font-size:15px;font-weight:700}
 .st-preview{--c:var(--s-preview);--b:var(--s-preview-bg)} .st-reply{--c:var(--s-reply);--b:var(--s-reply-bg)}
 .st-revisions{--c:var(--s-revisions);--b:var(--s-revisions-bg)} .st-ready{--c:var(--s-ready);--b:var(--s-ready-bg)}
 .st-done{--c:var(--s-done);--b:var(--s-done-bg)}
+.st-cancelled{--c:var(--s-cancelled);--b:var(--s-cancelled-bg)}
+.card.is-cancelled h4{text-decoration:line-through;color:var(--muted)}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--b);color:var(--c);white-space:nowrap}
 .badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
 select.status-select{appearance:none;-webkit-appearance:none;border:0;border-radius:999px;background-color:var(--b);color:var(--c);font-weight:600;font-size:13px;min-height:34px;width:auto;cursor:pointer;max-width:100%;
@@ -322,6 +325,44 @@ tbody tr:hover{background:var(--surface-2)}
 .form-actions{display:flex;gap:8px;position:sticky;bottom:-20px;background:var(--surface);padding:12px 0 4px;border-top:1px solid var(--line)}
 .form-actions .btn{flex:1}
 
+/* content */
+.content-add{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.content-add{grid-template-columns:minmax(0,1.2fr) minmax(0,1.2fr) auto auto;align-items:end}}
+.seg.yn{align-self:flex-start}
+.seg.yn button{min-width:56px;padding:8px 14px}
+.content-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.content-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ct-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.ct-card.all{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+.ct-top{display:flex;gap:10px;align-items:flex-start}
+.ct-top h3{font-size:16px;overflow-wrap:anywhere}
+.ct-link{font-size:12.5px;color:var(--accent);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none}
+.ch-groups{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.ch-group{display:flex;align-items:center;gap:10px}
+.ch-name{width:68px;flex:0 0 68px;font-size:13px;color:var(--muted)}
+.ch-btns{display:flex;gap:8px;flex-wrap:wrap}
+.ch{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px 0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:13.5px;cursor:pointer}
+.ch .tick{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;line-height:1;font-weight:700}
+.ch.on{background:var(--ok-soft);border-color:transparent;color:var(--ok);font-weight:600}
+.ch.on .tick{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.tab span{white-space:nowrap}
+@media (max-width:420px){.tab{font-size:10.5px}}
+
+/* links */
+.links-box{display:flex;flex-direction:column;gap:8px}
+.link-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) auto;gap:8px;align-items:center}
+@media (max-width:520px){.link-row{grid-template-columns:minmax(0,1fr) auto}.link-row input[name=linkUrl]{grid-column:1;grid-row:2}.link-row .icon-btn{grid-row:1/3;grid-column:2}}
+.link-list{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.link-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);min-width:0}
+.link-item a{flex:1;min-width:0;display:flex;flex-direction:column;text-decoration:none;color:var(--ink)}
+.link-item a b{font-size:14px}
+.link-item a span{font-size:12.5px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.link-item .li-ic{color:var(--icon);display:grid}.link-item .li-ic svg{width:18px;height:18px}
+.link-item .icon-btn{width:32px;height:32px}
+.link-add{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) auto;gap:8px;margin-top:8px}
+.link-add input{min-height:38px;font-size:15px}
+@media (max-width:520px){.link-add{grid-template-columns:minmax(0,1fr) auto}.link-add input[name=url]{grid-column:1}.link-add .btn{grid-row:1/3;grid-column:2;align-self:stretch}}
+
 /* sync */
 .topbar .brand{flex:1;min-width:0}
 .sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
@@ -341,7 +382,7 @@ tbody tr:hover{background:var(--surface-2)}
 <body>
 
 <header class="topbar">
-  <a class="brand" href="#home" aria-label="ريم الحربي"><b><span class="r1">ريم</span> <span class="r2">الحربي</span></b><small>GRAPHIC DESIGN</small></a>
+  <a class="brand" href="#home" aria-label="my studio"><b dir="ltr"><span class="r1">my</span> <span class="r2">studio</span></b><small>GRAPHIC DESIGN</small></a>
   <a class="sync-pill" id="sync-pill" href="#settings" hidden></a>
   <a class="icon-btn" href="#settings" aria-label="الإعدادات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>
 </header>
@@ -376,14 +417,32 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const STORE_KEY = 'reemstudio.v1';
 const STATUSES = [
   ['new','طلب جديد'],['progress','قيد التنفيذ'],['preview','بانتظار معاينة العميلة'],
-  ['reply','بانتظار رد العميلة'],['revisions','تعديلات مطلوبة'],['ready','جاهز للتسليم'],['done','مكتمل']
+  ['reply','بانتظار رد العميلة'],['revisions','تعديلات مطلوبة'],['ready','جاهز للتسليم'],['done','مكتمل'],['cancelled','ملغي']
 ];
 const ST = Object.fromEntries(STATUSES);
 const REV_STATUSES = [['new','جديد'],['progress','قيد التنفيذ'],['done','تم التنفيذ'],['sent','أُرسل للعميلة'],['approved','تمت الموافقة عليه']];
 const REV = Object.fromEntries(REV_STATUSES);
 const REV_OPEN = ['new','progress'];
 const REV_ST_CLASS = {new:'st-revisions',progress:'st-progress',done:'st-ready',sent:'st-preview',approved:'st-done'};
-const SERVICES = ['موقع إلكتروني','مبادرة تعليمية','عرض تفاعلي','ملف إنجاز','منصة','تصميم جرافيكي','أخرى'];
+const SERVICES = ['موقع إلكتروني','مبادرة تعليمية','مبادرة','عرض تفاعلي','ملف إنجاز','ملف PDF','أسئلة','منصة','تصميم جرافيكي','أخرى'];
+const CLOSED = ['done','cancelled'];
+const LINK_LABELS = ['المعاينة','الموقع المنشور','الملف النهائي','ملف PDF','ملفات التصميم','مجلد Drive'];
+const URL_RE = /^https?:\/\/\S+\.\S+/i;
+/* Several links per order are stored in the single "link" field: a plain URL when there is one unnamed link, otherwise JSON */
+function parseLinks(v){
+  v = String(v||'').trim(); if(!v) return [];
+  if(v[0]==='['){ try{ const a = JSON.parse(v); if(Array.isArray(a)) return a.filter(x=>x&&x.url).map(x=>({label:String(x.label||''),url:String(x.url)})); }catch(e){} }
+  return [{label:'',url:v}];
+}
+function serializeLinks(arr){
+  const a = arr.filter(x=>x.url).map(x=>({label:(x.label||'').trim(),url:x.url.trim()}));
+  if(!a.length) return '';
+  if(a.length===1 && !a[0].label) return a[0].url;
+  return JSON.stringify(a);
+}
+function linkRow(l){
+  return '<div class="link-row"><input name="linkLabel" list="link-labels" placeholder="اسم الرابط (اختياري)" value="'+esc(l.label)+'" aria-label="اسم الرابط"><input name="linkUrl" type="url" inputmode="url" dir="ltr" placeholder="https://" value="'+esc(l.url)+'" aria-label="الرابط"><button class="icon-btn" type="button" data-act="link-remove" aria-label="حذف الرابط">'+I.trash+'</button></div>';
+}
 const PAY = [['unpaid','لم يُدفع'],['deposit','عربون مدفوع'],['paid','مدفوع بالكامل']];
 const PAYM = Object.fromEntries(PAY);
 
@@ -393,6 +452,7 @@ const I = {
   clients:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.9.7 3.1 2.5 3.5 5.2"/></svg>',
   calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
   settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  content:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.2-.3-.3-.6-.4z"/></svg>',
@@ -411,7 +471,7 @@ const I = {
 };
 
 /* ========== Storage ========== */
-function emptyDb(){ return {version:1, clients:[], projects:[], revisions:[], tasks:[], events:[], settings:{}}; }
+function emptyDb(){ return {version:1, clients:[], projects:[], revisions:[], tasks:[], events:[], content:[], settings:{}}; }
 let storageOk = true;
 function loadDb(){
   try{
@@ -423,7 +483,7 @@ function loadDb(){
 function normalizeDb(d){
   const base = emptyDb();
   if(!d || typeof d !== 'object') return base;
-  for(const k of ['clients','projects','revisions','tasks','events']) base[k] = Array.isArray(d[k]) ? d[k] : [];
+  for(const k of ['clients','projects','revisions','tasks','events','content']) base[k] = Array.isArray(d[k]) ? d[k] : [];
   base.settings = (d.settings && typeof d.settings==='object') ? d.settings : {};
   return base;
 }
@@ -486,7 +546,7 @@ const phoneDisplay = c => '+' + c.cc + ' ' + c.num;
 const clientOf = p => db.clients.find(c => c.id===p.clientId) || {name:'(عميلة محذوفة)',cc:'966',num:''};
 const revsOf = pid => db.revisions.filter(r => r.projectId===pid).sort((a,b)=>a.createdAt.localeCompare(b.createdAt));
 const tasksOf = pid => db.tasks.filter(t => t.projectId===pid);
-const isOverdue = p => !!p.due && p.status!=='done' && p.due < today();
+const isOverdue = p => !!p.due && !CLOSED.includes(p.status) && p.due < today();
 const isFollowLate = c => !!c.followUp && c.followUp < today();
 const activeProjects = () => db.projects.filter(p => !p.archived);
 
@@ -498,6 +558,7 @@ function touch(p){ p.updatedAt = nowIso(); }
 function dueChip(p){
   if(!p.due) return '<span class="chip">بدون موعد</span>';
   if(p.status==='done') return '<span class="chip ok">سُلّم · '+esc(fmt(p.due))+'</span>';
+  if(p.status==='cancelled') return '<span class="chip">ملغي</span>';
   const d = diffDays(p.due, today());
   if(d<0) return '<span class="chip late">متأخر '+dayWord(d)+'</span>';
   if(d===0) return '<span class="chip today">التسليم اليوم</span>';
@@ -529,7 +590,7 @@ function toast(msg, type){
 }
 
 /* ========== Navigation ========== */
-const NAV = [['home','الرئيسية'],['orders','الطلبات'],['clients','العميلات'],['calendar','التقويم'],['settings','الإعدادات']];
+const NAV = [['home','الرئيسية'],['orders','الطلبات'],['content','محتواي'],['clients','العميلات'],['calendar','التقويم'],['settings','الإعدادات']];
 const ui = {
   q:'', status:'all', due:'all', view: (()=>{ try{return localStorage.getItem('reemstudio.view')||'kanban';}catch(e){return 'kanban';} })(),
   archived:false, calMode:'month', calAnchor:today(), calSel:today(), clientQ:'', openClient:null
@@ -544,12 +605,13 @@ function renderNav(){
   const r = route().name === 'p' ? 'orders' : route().name;
   const links = NAV.map(([k,v]) => '<a class="tab" href="#'+k+'"'+(r===k?' aria-current="page"':'')+'>'+I[k]+'<span>'+v+'</span></a>').join('');
   $('#tabbar').innerHTML = links;
-  $('#side').innerHTML = '<a class="brand" href="#home" aria-label="ريم الحربي"><b><span class="r1">ريم</span> <span class="r2">الحربي</span></b><small>GRAPHIC DESIGN</small></a><a class="sync-pill" id="sync-pill-side" href="#settings" hidden></a>' + links +
+  $('#side').innerHTML = '<a class="brand" href="#home" aria-label="my studio"><b dir="ltr"><span class="r1">my</span> <span class="r2">studio</span></b><small>GRAPHIC DESIGN</small></a><a class="sync-pill" id="sync-pill-side" href="#settings" hidden></a>' + links +
     '<button class="btn primary add" type="button" data-act="new-order">'+I.plus+'طلب جديد</button>';
   setSync(sync.status);
 }
 function render(){
   renderNav();
+  document.querySelector('.fab').hidden = route().name==='content';
   const {name, id} = route();
   const m = $('#main');
   if(name==='p') m.innerHTML = viewDetail(id);
@@ -557,6 +619,7 @@ function render(){
   else if(name==='clients'){ m.innerHTML = viewClients(); renderClientResults(); }
   else if(name==='calendar') m.innerHTML = viewCalendar();
   else if(name==='settings'){ m.innerHTML = viewSettings(); fillStorageInfo(); }
+  else if(name==='content'){ m.innerHTML = viewContent(); renderContentList(); }
   else m.innerHTML = viewHome();
 }
 window.addEventListener('hashchange', ()=>{ render(); window.scrollTo(0,0); });
@@ -565,7 +628,7 @@ window.addEventListener('hashchange', ()=>{ render(); window.scrollTo(0,0); });
 function homeBuckets(){
   const t = today();
   const act = activeProjects();
-  const dueToday = act.filter(p => p.due===t && p.status!=='done');
+  const dueToday = act.filter(p => p.due===t && !CLOSED.includes(p.status));
   const late = act.filter(isOverdue).sort((a,b)=>a.due.localeCompare(b.due));
   const followToday = db.clients.filter(c => c.followUp===t);
   const followLate = db.clients.filter(isFollowLate);
@@ -695,8 +758,8 @@ function renderOrderResults(){
 function card(p){
   const c = clientOf(p), ro = revOpenCount(p.id);
   const idx = STATUSES.findIndex(s=>s[0]===p.status);
-  const next = STATUSES[idx+1];
-  return '<article class="card'+(isOverdue(p)?' is-late':'')+'" data-open="'+p.id+'">'+
+  const next = CLOSED.includes(p.status) ? null : STATUSES[idx+1];
+  return '<article class="card'+(isOverdue(p)?' is-late':'')+(p.status==='cancelled'?' is-cancelled':'')+'" data-open="'+p.id+'">'+
     '<div class="row"><span class="muted small">'+esc(p.service)+'</span><span class="spacer"></span>'+demoChip(p)+'</div>'+
     '<h4>'+esc(p.title)+'</h4><span class="muted small">'+esc(c.name)+'</span>'+
     '<div class="meta">'+dueChip(p)+(ro?'<span class="chip late">'+ro+' تعديل معلّق</span>':'')+(p.payment==='unpaid'?'<span class="chip">لم يُدفع</span>':'')+'</div>'+
@@ -732,11 +795,17 @@ function orderForm(p){
       '<div class="field" data-f="due"><label for="o-due">موعد التسليم النهائي</label><input id="o-due" name="due" type="date" value="'+v('due')+'"><span class="err"></span></div>'+
       '<div class="field" data-f="price"><label for="o-price">السعر المتفق عليه (ر.س)</label><input id="o-price" name="price" inputmode="decimal" value="'+v('price')+'"><span class="err"></span></div>'+
       '<div class="field"><label for="o-pay">حالة الدفع</label><select id="o-pay" name="payment">'+opt(PAY, p?p.payment:'unpaid')+'</select></div>'+
-      '<div class="field full" data-f="link"><label for="o-link">رابط المشروع أو المعاينة</label><input id="o-link" name="link" type="url" inputmode="url" dir="ltr" placeholder="https://" value="'+v('link')+'"><span class="err"></span></div>'+
+      '<div class="field full" data-f="link"><span class="lbl">روابط المشروع</span><div class="links-box" id="links-box">'+(p&&parseLinks(p.link).length?parseLinks(p.link):[{label:'',url:''}]).map(linkRow).join('')+'</div>'+
+        '<datalist id="link-labels">'+LINK_LABELS.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist>'+
+        '<button class="btn sm" type="button" data-act="link-add" style="align-self:flex-start">'+I.plus+'إضافة رابط</button><span class="err"></span></div>'+
       '<div class="field full"><label for="o-notes">ملاحظات خاصة بي</label><textarea id="o-notes" name="notes">'+v('notes')+'</textarea></div>'+
     '</div>'+
     '<div class="form-actions"><button class="btn primary" type="submit">'+(p?'حفظ التغييرات':'حفظ الطلب')+'</button><button class="btn" type="button" data-act="close-sheet">إلغاء</button></div>'+
   '</form>';
+}
+function formLinks(form){
+  const L = [...form.querySelectorAll('[name=linkLabel]')].map(i=>i.value), U = [...form.querySelectorAll('[name=linkUrl]')].map(i=>i.value.trim());
+  return U.map((u,i)=>({label:(L[i]||'').trim(), url:u})).filter(x=>x.url);
 }
 function setErr(form, f, msg){
   const el = form.querySelector('[data-f="'+f+'"]'); if(!el) return;
@@ -752,7 +821,7 @@ function readOrderForm(form){
     phone: phoneError(ph.cc, ph.num),
     due: (fd.due && fd.received && fd.due < fd.received) ? 'موعد التسليم قبل تاريخ الاستلام' : '',
     price: (fd.price.trim() && isNaN(Number(toLatinDigits(fd.price).replace(/[,،\s]/g,'')))) ? 'اكتبي السعر أرقامًا فقط' : '',
-    link: (fd.link.trim() && !/^https?:\/\/\S+\.\S+/i.test(fd.link.trim())) ? 'الرابط يجب أن يبدأ بـ https://' : ''
+    link: formLinks(form).some(l=>!URL_RE.test(l.url)) ? 'كل رابط يجب أن يبدأ بـ https://' : ''
   };
   for(const [k,m] of Object.entries(errs)){ setErr(form,k,m); if(m) ok=false; }
   return {ok, fd, ph, errs};
@@ -782,7 +851,7 @@ function submitOrder(form){
   if(followChanged && fd.followUp) logEvent(null, 'حُدّد موعد متابعة '+fmt(fd.followUp), client.id);
 
   const data = {clientId:client.id, title:fd.title.trim(), service:fd.service, desc:fd.desc.trim(), received:fd.received||'', due:fd.due||'',
-    price, payment:fd.payment, link:fd.link.trim(), notes:fd.notes.trim(), status:fd.status};
+    price, payment:fd.payment, link:serializeLinks(formLinks(form)), notes:fd.notes.trim(), status:fd.status};
   if(p){
     const changes = [];
     if(p.status!==data.status) changes.push('الحالة إلى «'+ST[data.status]+'»');
@@ -825,7 +894,7 @@ function viewDetail(id){
     '<div class="acts">'+
       (c.num?'<a class="btn wa" href="'+esc(waUrl(c))+'" target="_blank" rel="noopener noreferrer">'+I.wa+'واتساب '+esc(c.name)+'</a>':'')+
       '<button class="btn" type="button" data-act="edit-order" data-id="'+p.id+'">'+I.edit+'تعديل البيانات</button>'+
-      (p.status==='done' || p.archived ? '<button class="btn" type="button" data-act="archive" data-id="'+p.id+'">'+I.archive+(p.archived?'إلغاء الأرشفة':'أرشفة')+'</button>' : '')+
+      (CLOSED.includes(p.status) || p.archived ? '<button class="btn" type="button" data-act="archive" data-id="'+p.id+'">'+I.archive+(p.archived?'إلغاء الأرشفة':'أرشفة')+'</button>' : '')+
       '<button class="btn danger" type="button" data-act="delete-order" data-id="'+p.id+'">'+I.trash+'حذف</button>'+
     '</div>'+
   '</div>'+
@@ -838,7 +907,9 @@ function viewDetail(id){
         '<div class="fact"><span class="k">موعد التسليم</span><span class="v">'+esc(fmt(p.due,{day:'numeric',month:'long',year:'numeric'}))+'</span></div>'+
         '<div class="fact"><span class="k">السعر</span><span class="v num">'+money(p.price)+'</span></div>'+
         '<div class="fact"><span class="k">الدفع</span><select data-change="payment" data-id="'+p.id+'" aria-label="حالة الدفع" style="min-height:36px;padding:4px 10px;font-size:14px">'+PAY.map(([k,v])=>'<option value="'+k+'"'+(k===p.payment?' selected':'')+'>'+v+'</option>').join('')+'</select></div>'+
-        '<div class="fact wide"><span class="k">رابط المعاينة / الموقع</span>'+(p.link?'<a class="v ltr" href="'+esc(p.link)+'" target="_blank" rel="noopener noreferrer">'+esc(p.link)+'</a>':'<span class="v muted">لم يُضف بعد</span>')+'</div>'+
+        '<div class="fact wide"><span class="k">روابط المشروع</span>'+(parseLinks(p.link).length?'<div class="link-list">'+parseLinks(p.link).map((l,i)=>'<div class="link-item"><span class="li-ic">'+I.link+'</span><a href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer"><b>'+esc(l.label||('رابط '+(i+1)))+'</b><span class="ltr">'+esc(l.url)+'</span></a><button class="icon-btn" type="button" data-act="link-del" data-id="'+p.id+'" data-i="'+i+'" aria-label="حذف الرابط">'+I.trash+'</button></div>').join('')+'</div>':'<span class="v muted">لم يُضف رابط بعد</span>')+
+          '<form class="link-add" data-form="link" data-id="'+p.id+'" novalidate><input name="label" list="link-labels-d" placeholder="اسم الرابط" aria-label="اسم الرابط"><input name="url" type="url" inputmode="url" dir="ltr" placeholder="https://" aria-label="الرابط"><button class="btn sm" type="submit">إضافة</button></form>'+
+          '<datalist id="link-labels-d">'+LINK_LABELS.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
         '<div class="fact wide"><span class="k">متابعة العميلة</span><div class="followbox"><input type="date" data-change="follow" data-id="'+c.id+'" value="'+esc(c.followUp||'')+'" aria-label="موعد المتابعة">'+followChip(c)+'</div></div>'+
       '</div></section>'+
       '<section class="panel"><h3>وصف الطلب الأصلي</h3><p class="prose '+(p.desc?'':'muted')+'" style="margin-top:6px">'+esc(p.desc||'لا يوجد وصف.')+'</p></section>'+
@@ -918,6 +989,71 @@ function submitRev(form){
   closeSheet(); render();
 }
 
+/* ========== Content (محتواي) ========== */
+const CHANNELS = [
+  {group:'تيك توك', items:[['tiktok','منشور'],['tiktokStory','قصة']]},
+  {group:'إنستقرام', items:[['igPost','منشور'],['igStory','قصة']]},
+  {group:'واتساب', items:[['waStatus','حالة']]}
+];
+const CH_KEYS = CHANNELS.flatMap(g=>g.items.map(i=>i[0]));
+const chDone = c => CH_KEYS.filter(k=>c[k]).length;
+ui.cq2 = ''; ui.cf = 'all';
+function viewContent(){
+  const all = db.content, total = all.length;
+  const none = all.filter(c=>!chDone(c)).length, full = all.filter(c=>chDone(c)===CH_KEYS.length).length;
+  const f = [['all','الكل',total],['none','لم تُنشر',none],['partial','ناقصة',total-none-full],['full','نُشرت في الكل',full]];
+  return '<div class="page-head"><div><h1>محتواي</h1><p class="muted small">أفكار المحتوى وأين نشرتِها</p></div></div>'+
+    (sync.missingContent ? '<div class="notice warn" style="margin-bottom:12px">'+I.alert+'<div>محتواي محفوظ على هذا الجهاز فقط حتى تشغّلي ملف التحديث <span class="ltr">reem-studio-update-content.sql</span> في Supabase.</div></div>' : '')+
+    '<form class="panel content-add" id="content-form" novalidate>'+
+      '<div class="field" data-f="title"><label for="ct-title">اسم الفكرة</label><input id="ct-title" name="title" autocomplete="off" placeholder="مثال: صفحة مبادرة القراءة"><span class="err"></span></div>'+
+      '<div class="field" data-f="link"><label for="ct-link">الرابط</label><input id="ct-link" name="link" type="url" inputmode="url" dir="ltr" placeholder="https://"><span class="err"></span></div>'+
+      '<div class="field"><span class="lbl">تحتاج قاعدة بيانات؟</span><div class="seg yn" role="radiogroup" aria-label="تحتاج قاعدة بيانات؟"><button type="button" role="radio" data-act="ct-db" data-v="1" aria-pressed="false">نعم</button><button type="button" role="radio" data-act="ct-db" data-v="0" aria-pressed="true">لا</button></div></div>'+
+      '<button class="btn primary" type="submit">'+I.plus+'إضافة الفكرة</button>'+
+    '</form>'+
+    '<div class="toolbar section"><label class="search">'+I.search+'<input type="search" id="cq2" placeholder="ابحثي باسم الفكرة" value="'+esc(ui.cq2)+'" aria-label="بحث في المحتوى"></label>'+
+      '<div class="seg" role="group" aria-label="تصفية">'+f.map(([k,l,n])=>'<button type="button" data-act="ct-filter" data-v="'+k+'" aria-pressed="'+(ui.cf===k)+'">'+l+' <span class="num muted">'+n+'</span></button>').join('')+'</div></div>'+
+    '<div id="content-list"></div>';
+}
+function renderContentList(){
+  const box = $('#content-list'); if(!box) return;
+  const q = ui.cq2.trim().toLowerCase();
+  const list = db.content.filter(c=>{
+    const d = chDone(c);
+    if(ui.cf==='none' && d) return false;
+    if(ui.cf==='partial' && (d===0 || d===CH_KEYS.length)) return false;
+    if(ui.cf==='full' && d!==CH_KEYS.length) return false;
+    return !q || c.title.toLowerCase().includes(q);
+  }).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  if(!db.content.length){ box.innerHTML = '<div class="panel"><div class="empty">'+I.emptyArt+'<b>لا توجد أفكار بعد</b><span>أضيفي أول فكرة من الأعلى، ثم علّمي على المنصات التي نشرتِها فيها.</span></div></div>'; return; }
+  if(!list.length){ box.innerHTML = '<div class="panel"><div class="empty compact">لا نتائج مطابقة.</div></div>'; return; }
+  box.innerHTML = '<div class="content-grid">'+list.map(c=>{
+    const d = chDone(c);
+    return '<article class="ct-card'+(d===CH_KEYS.length?' all':'')+'">'+
+      '<div class="ct-top"><div class="grow" style="min-width:0"><h3>'+esc(c.title)+'</h3>'+
+        (c.link?'<a class="ct-link ltr" href="'+esc(c.link)+'" target="_blank" rel="noopener noreferrer">'+esc(c.link.replace(/^https?:\/\//,''))+'</a>':'<span class="muted small">بدون رابط</span>')+'</div>'+
+        '<button class="icon-btn" type="button" data-act="ct-edit" data-id="'+c.id+'" aria-label="تعديل الفكرة">'+I.edit+'</button></div>'+
+      '<div class="row"><span class="chip '+(c.needsDb?'today':'')+'">'+(c.needsDb?'تحتاج قاعدة بيانات':'بدون قاعدة بيانات')+'</span><span class="chip '+(d===CH_KEYS.length?'ok':'')+'"><span class="num">'+d+' / '+CH_KEYS.length+'</span>&nbsp;نُشرت</span>'+demoChip(c)+'</div>'+
+      '<div class="ch-groups">'+CHANNELS.map(g=>'<div class="ch-group"><span class="ch-name">'+g.group+'</span><div class="ch-btns">'+g.items.map(([k,l])=>'<button type="button" class="ch'+(c[k]?' on':'')+'" data-act="ct-toggle" data-id="'+c.id+'" data-k="'+k+'" aria-pressed="'+!!c[k]+'"><span class="tick">'+(c[k]?'✓':'')+'</span>'+l+'</button>').join('')+'</div></div>').join('')+'</div>'+
+    '</article>';
+  }).join('')+'</div>';
+}
+function contentEditForm(c){
+  return '<form class="form" id="content-edit-form" novalidate data-id="'+c.id+'">'+
+    '<div class="field" data-f="title"><label for="ce-title">اسم الفكرة</label><input id="ce-title" name="title" value="'+esc(c.title)+'"><span class="err"></span></div>'+
+    '<div class="field" data-f="link"><label for="ce-link">الرابط</label><input id="ce-link" name="link" type="url" dir="ltr" value="'+esc(c.link)+'" placeholder="https://"><span class="err"></span></div>'+
+    '<div class="field"><label for="ce-db">تحتاج قاعدة بيانات؟</label><select id="ce-db" name="needsDb"><option value="1"'+(c.needsDb?' selected':'')+'>نعم</option><option value="0"'+(c.needsDb?'':' selected')+'>لا</option></select></div>'+
+    '<div class="field"><label for="ce-notes">ملاحظات</label><textarea id="ce-notes" name="notes" style="min-height:70px">'+esc(c.notes||'')+'</textarea></div>'+
+    '<div class="form-actions"><button class="btn primary" type="submit">حفظ</button><button class="btn danger" type="button" data-act="ct-del" data-id="'+c.id+'">حذف</button></div>'+
+  '</form>';
+}
+function readContentForm(f){
+  const title = f.title.value.trim(), link = f.link.value.trim();
+  const e1 = title ? '' : 'اكتبي اسم الفكرة', e2 = (link && !URL_RE.test(link)) ? 'الرابط يجب أن يبدأ بـ https://' : '';
+  setErr(f,'title',e1); setErr(f,'link',e2);
+  if(e1||e2){ toast('راجعي الحقول المحدّدة بالأحمر','err'); return null; }
+  return {title, link};
+}
+
 /* ========== Clients ========== */
 function viewClients(){
   return '<div class="page-head"><div><h1>العميلات</h1><p class="muted small">'+db.clients.length+' عميلة</p></div></div>'+
@@ -935,7 +1071,7 @@ function renderClientResults(){
   if(!list.length){ box.innerHTML = '<div class="panel"><div class="empty compact">لا نتائج مطابقة.</div></div>'; return; }
   box.innerHTML = '<div class="stack">'+list.map(c=>{
     const ps = db.projects.filter(p=>p.clientId===c.id);
-    const act = ps.filter(p=>!p.archived && p.status!=='done').length;
+    const act = ps.filter(p=>!p.archived && !CLOSED.includes(p.status)).length;
     return '<article class="client" id="c-'+c.id+'">'+
       '<div class="head"><span class="avatar">'+esc((c.name||'؟').trim().charAt(0))+'</span><div style="flex:1;min-width:0"><b>'+esc(c.name)+'</b> '+demoChip(c)+'<div class="muted small ltr">'+esc(phoneDisplay(c))+'</div></div>'+
         '<a class="icon-btn" href="'+esc(waUrl(c))+'" target="_blank" rel="noopener noreferrer" aria-label="واتساب" style="color:#1F8F4E">'+I.wa+'</a>'+
@@ -972,7 +1108,7 @@ function submitClient(form){
 /* ========== Calendar ========== */
 function calItems(d){
   const out = [];
-  activeProjects().forEach(p => { if(p.due===d) out.push({type: isOverdue(p)?'late':'due', p}); });
+  activeProjects().forEach(p => { if(p.due===d && p.status!=='cancelled') out.push({type: isOverdue(p)?'late':'due', p}); });
   db.clients.forEach(c => { if(c.followUp===d) out.push({type:'follow', c}); });
   return out;
 }
@@ -1103,6 +1239,7 @@ function removeDemo(){
   db.revisions = db.revisions.filter(r=>!r.demo && !pids.has(r.projectId));
   db.tasks = db.tasks.filter(x=>!x.demo && !pids.has(x.projectId));
   db.events = db.events.filter(e=>!pids.has(e.projectId));
+  db.content = db.content.filter(x=>!x.demo);
   const usedC = new Set(db.projects.map(p=>p.clientId));
   db.clients = db.clients.filter(c=>!c.demo || usedC.has(c.id));
   save('حُذفت البيانات التجريبية'); render();
@@ -1144,7 +1281,7 @@ document.addEventListener('click', e => {
       case 'goto-filter': ui.status = a.dataset.status; ui.due = a.dataset.due; ui.q=''; ui.archived=false; go('orders'); break;
       case 'clear-filters': ui.status='all'; ui.due='all'; ui.q=''; render(); break;
       case 'view': ui.view = a.dataset.v; try{localStorage.setItem('reemstudio.view',ui.view);}catch(err){} render(); break;
-      case 'next-status': { e.stopPropagation(); const p = db.projects.find(x=>x.id===id); const i = STATUSES.findIndex(s=>s[0]===p.status); if(STATUSES[i+1]){ setStatus(id, STATUSES[i+1][0]); renderOrderResults(); } break; }
+      case 'next-status': { e.stopPropagation(); const p = db.projects.find(x=>x.id===id); const i = STATUSES.findIndex(s=>s[0]===p.status); if(STATUSES[i+1] && !CLOSED.includes(p.status)){ setStatus(id, STATUSES[i+1][0]); renderOrderResults(); } break; }
       case 'wa-from-form': {
         const f = $('#order-form'); const ph = normalizePhone(f.cc.value, f.phone.value); const err = phoneError(ph.cc, ph.num);
         setErr(f,'phone',err);
@@ -1175,6 +1312,14 @@ document.addEventListener('click', e => {
       case 'notif': Notification.requestPermission().then(()=>{ trySummaryNotification(true); render(); }); break;
       case 'add-demo': addDemo(); break;
       case 'remove-demo': confirmBox('حذف البيانات التجريبية؟','تُحذف فقط العناصر المميّزة بشارة «تجريبي».','حذف التجريبية', removeDemo); break;
+      case 'link-add': { const box = $('#links-box'); box.insertAdjacentHTML('beforeend', linkRow({label:'',url:''})); box.lastElementChild.querySelector('input').focus(); break; }
+      case 'link-remove': { const row = a.closest('.link-row'); const box = row.parentElement; row.remove(); if(!box.children.length) box.insertAdjacentHTML('beforeend', linkRow({label:'',url:''})); break; }
+      case 'link-del': { const p = db.projects.find(x=>x.id===id); const arr = parseLinks(p.link); const gone = arr.splice(+a.dataset.i,1)[0]; p.link = serializeLinks(arr); touch(p); logEvent(p.id,'حُذف رابط: '+(gone.label||gone.url)); save('تم حذف الرابط'); render(); break; }
+      case 'ct-db': a.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b===a))); break;
+      case 'ct-filter': ui.cf = a.dataset.v; render(); break;
+      case 'ct-toggle': { const c = db.content.find(x=>x.id===id); c[a.dataset.k] = !c[a.dataset.k]; c.updatedAt = nowIso(); save(); render(); break; }
+      case 'ct-edit': openSheet('تعديل الفكرة', contentEditForm(db.content.find(x=>x.id===id))); break;
+      case 'ct-del': { const c = db.content.find(x=>x.id===id); closeSheet(); confirmBox('حذف الفكرة؟','ستُحذف «'+c.title+'» من محتواي.','حذف',()=>{ db.content = db.content.filter(x=>x.id!==id); save('تم حذف الفكرة'); render(); }); break; }
       case 'sync-now': syncNow(true); break;
       case 'sync-logout': confirmBox('تسجيل الخروج؟','تُمسح نسخة البيانات من هذا الجهاز فقط، وتبقى محفوظة في السحابة وتعود عند تسجيل الدخول مرة أخرى.','تسجيل الخروج', signOut); break;
       case 'sync-edit-config': ui.editSyncConfig = true; render(); break;
@@ -1210,6 +1355,7 @@ document.addEventListener('input', e => {
   const el = e.target;
   if(el.id==='q'){ ui.q = el.value; renderOrderResults(); return; }
   if(el.id==='cq'){ ui.clientQ = el.value; renderClientResults(); return; }
+  if(el.id==='cq2'){ ui.cq2 = el.value; renderContentList(); return; }
   if(el.dataset.input==='notes'){
     clearTimeout(notesTimer);
     notesTimer = setTimeout(()=>{ const p = db.projects.find(x=>x.id===el.dataset.id); if(!p) return; p.notes = el.value; touch(p); if(save()){ const s = $('#notes-saved'); if(s){ s.classList.add('on'); setTimeout(()=>s.classList.remove('on'),1400);} } }, 500);
@@ -1218,11 +1364,29 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('submit', e => {
   const f = e.target; e.preventDefault();
+  if(f.id==='content-form'){
+    const v = readContentForm(f); if(!v) return;
+    const needsDb = f.querySelector('[data-act=ct-db][aria-pressed=true]').dataset.v==='1';
+    db.content.push(Object.assign({id:uid(), needsDb, notes:'', tiktok:false, tiktokStory:false, waStatus:false, igStory:false, igPost:false, createdAt:nowIso(), updatedAt:nowIso()}, v));
+    save('أُضيفت الفكرة'); render(); const t = $('#ct-title'); if(t) t.focus(); return;
+  }
+  if(f.id==='content-edit-form'){
+    const v = readContentForm(f); if(!v) return;
+    const c = db.content.find(x=>x.id===f.dataset.id);
+    Object.assign(c, v, {needsDb: f.needsDb.value==='1', notes: f.notes.value.trim(), updatedAt: nowIso()});
+    save('تم حفظ الفكرة'); closeSheet(); render(); return;
+  }
   if(f.id==='sync-config-form') submitSyncConfig(f);
   else if(f.id==='login-form') submitLogin(f);
   else if(f.id==='order-form') submitOrder(f);
   else if(f.id==='rev-form') submitRev(f);
   else if(f.id==='client-form') submitClient(f);
+  else if(f.dataset.form==='link'){
+    const url = f.url.value.trim(), label = f.label.value.trim();
+    if(!URL_RE.test(url)){ toast('الرابط يجب أن يبدأ بـ https://','err'); f.url.focus(); return; }
+    const p = db.projects.find(x=>x.id===f.dataset.id); const arr = parseLinks(p.link); arr.push({label,url});
+    p.link = serializeLinks(arr); touch(p); logEvent(p.id,'أُضيف رابط: '+(label||url)); save('أُضيف الرابط'); render();
+  }
   else if(f.dataset.form==='task'){
     const text = f.text.value.trim(); if(!text) return;
     db.tasks.push({id:uid(), projectId:f.dataset.id, text, done:false, createdAt:nowIso()});
@@ -1240,7 +1404,7 @@ function trySummaryNotification(force){
   const b = homeBuckets(); const n = b.dueToday.length + b.followToday.length, l = b.late.length + b.followLate.length;
   if(!n && !l && !force) return;
   try{
-    new Notification('ريم الحربي', {body: (n||l) ? ('اليوم: '+n+' · متأخر: '+l) : 'تم تفعيل الإشعارات', tag:'reem-daily'});
+    new Notification('my studio', {body: (n||l) ? ('اليوم: '+n+' · متأخر: '+l) : 'تم تفعيل الإشعارات', tag:'reem-daily'});
     db.settings.lastNotified = today(); save();
   }catch(err){
     if(force) toast('متصفح الجوال لا يعرض إشعارات من صفحة بدون خدمة خلفية؛ التذكير سيظهر داخل التطبيق.','err');
@@ -1274,7 +1438,10 @@ const TABLES = [
     fromRow:w=>({id:w.id,projectId:w.project_id,text:w.text,done:!!w.done,demo:!!w.demo,createdAt:TS(w.created_at)})},
   {key:'events', table:'events',
     toRow:e=>({id:e.id,project_id:N(e.projectId),client_id:N(e.clientId),text:e.text||'',at:N(e.at)}),
-    fromRow:w=>({id:w.id,projectId:w.project_id||null,clientId:w.client_id||null,text:w.text,at:TS(w.at)})}
+    fromRow:w=>({id:w.id,projectId:w.project_id||null,clientId:w.client_id||null,text:w.text,at:TS(w.at)})},
+  {key:'content', table:'content', optional:true,
+    toRow:c=>({id:c.id,title:c.title||'',link:c.link||'',needs_db:!!c.needsDb,tiktok:!!c.tiktok,tiktok_story:!!c.tiktokStory,wa_status:!!c.waStatus,ig_story:!!c.igStory,ig_post:!!c.igPost,notes:c.notes||'',demo:!!c.demo,created_at:N(c.createdAt),updated_at:N(c.updatedAt)}),
+    fromRow:w=>({id:w.id,title:w.title,link:S(w.link),needsDb:!!w.needs_db,tiktok:!!w.tiktok,tiktokStory:!!w.tiktok_story,waStatus:!!w.wa_status,igStory:!!w.ig_story,igPost:!!w.ig_post,notes:S(w.notes),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})}
 ];
 const sync = {client:null, session:null, status:'off', last:null, err:'', running:false, again:false, timer:null, channel:null};
 function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
@@ -1361,10 +1528,16 @@ async function syncNow(manual){
   try{
     const base = lsGet(BASE_KEY, {});
     const remote = {};
-    for(const t of TABLES) remote[t.key] = await fetchAll(t.table);
+    const skip = new Set();
+    for(const t of TABLES){
+      try{ remote[t.key] = await fetchAll(t.table); }
+      catch(err){ if(t.optional && /relation|does not exist|schema cache|Could not find/i.test(String(err && err.message))){ skip.add(t.key); remote[t.key] = []; sync.missingContent = true; } else throw err; }
+    }
+    if(!skip.has('content')) sync.missingContent = false;
     const before = JSON.stringify(TABLES.map(t=>db[t.key]));
     const result = {}, upserts = {}, deletes = {}, newBase = {};
     for(const t of TABLES){
+      if(skip.has(t.key)){ result[t.key] = db[t.key]; newBase[t.key] = base[t.key] || {}; upserts[t.key] = []; deletes[t.key] = []; continue; }
       const B = base[t.key] || {};
       const L = new Map(db[t.key].map(x=>[x.id, x]));
       const R = new Map(remote[t.key].map(w=>{ const rec = t.fromRow(w); return [rec.id, rec]; }));
