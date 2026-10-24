@@ -1511,7 +1511,10 @@ function syncErrorText(e){
   const m = String((e && (e.message || e.error_description)) || e || '');
   if(/fetch|network|Failed to/i.test(m)) return navigator.onLine===false ? '' : 'تعذّر الوصول إلى Supabase. تأكدي من الرابط والاتصال.';
   if(/JWT|token|auth/i.test(m)) return 'انتهت الجلسة. سجّلي الدخول مرة أخرى.';
-  if(/relation|does not exist|schema cache/i.test(m)) return 'الجداول غير موجودة. شغّلي ملف الإعداد SQL في Supabase.';
+  const where = e && e.table ? ' (جدول '+e.table+(e.op?'، عند ال'+e.op:'')+')' : '';
+  if(/column/i.test(m)) return 'عمود ناقص في قاعدة البيانات'+where+': '+m;
+  if(/relation|does not exist|schema cache/i.test(m)) return 'جدول غير موجود في Supabase'+where+'. شغّلي ملف التحديث الخاص به.';
+  if(e && e.table) return 'تعذّرت المزامنة'+where+': '+m;
   if(/row-level security|policy|permission/i.test(m)) return 'رفضت سياسات الحماية العملية. تأكدي من تشغيل ملف الإعداد كاملًا.';
   return 'تعذّرت المزامنة: '+m;
 }
@@ -1531,7 +1534,7 @@ async function syncNow(manual){
     const skip = new Set();
     for(const t of TABLES){
       try{ remote[t.key] = await fetchAll(t.table); }
-      catch(err){ if(t.optional && /relation|does not exist|schema cache|Could not find/i.test(String(err && err.message))){ skip.add(t.key); remote[t.key] = []; sync.missingContent = true; } else throw err; }
+      catch(err){ if(t.optional && /relation|does not exist|schema cache|Could not find/i.test(String(err && err.message)) && !/column/i.test(String(err && err.message))){ skip.add(t.key); remote[t.key] = []; sync.missingContent = true; } else { err.table = t.table; err.op = 'قراءة'; throw err; } }
     }
     if(!skip.has('content')) sync.missingContent = false;
     const before = JSON.stringify(TABLES.map(t=>db[t.key]));
@@ -1565,14 +1568,14 @@ async function syncNow(manual){
       const rows = upserts[t.key];
       for(let i=0;i<rows.length;i+=500){
         const {error} = await sync.client.from(t.table).upsert(rows.slice(i,i+500), {onConflict:'id'});
-        if(error) throw error;
+        if(error){ error.table = t.table; error.op = 'حفظ'; throw error; }
       }
     }
     for(const t of [...TABLES].reverse()){
       const ids = deletes[t.key];
       for(let i=0;i<ids.length;i+=200){
         const {error} = await sync.client.from(t.table).delete().in('id', ids.slice(i,i+200));
-        if(error) throw error;
+        if(error){ error.table = t.table; error.op = 'حذف'; throw error; }
       }
     }
     const finalBase = {}; for(const t of TABLES) finalBase[t.key] = newBase[t.key];
