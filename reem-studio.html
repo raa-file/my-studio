@@ -348,6 +348,11 @@ tbody tr:hover{background:var(--surface-2)}
 .tab span{white-space:nowrap}
 @media (max-width:420px){.tab{font-size:10.5px}}
 
+/* share */
+.share-panel{border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.share-link{display:flex;gap:8px}
+.share-link input{flex:1;min-width:0;font-size:13px;min-height:38px;color:var(--muted)}
+
 /* links */
 .links-box{display:flex;flex-direction:column;gap:8px}
 .link-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) auto;gap:8px;align-items:center}
@@ -556,9 +561,9 @@ function logEvent(projectId, text, clientId){
 function touch(p){ p.updatedAt = nowIso(); }
 
 function dueChip(p){
-  if(!p.due) return '<span class="chip">بدون موعد</span>';
-  if(p.status==='done') return '<span class="chip ok">سُلّم · '+esc(fmt(p.due))+'</span>';
+  if(p.status==='done') return '<span class="chip ok">سُلّم'+(p.completedAt||p.due?' · '+esc(fmt(p.completedAt||p.due)):'')+'</span>';
   if(p.status==='cancelled') return '<span class="chip">ملغي</span>';
+  if(!p.due) return '<span class="chip">بدون موعد</span>';
   const d = diffDays(p.due, today());
   if(d<0) return '<span class="chip late">متأخر '+dayWord(d)+'</span>';
   if(d===0) return '<span class="chip today">التسليم اليوم</span>';
@@ -633,7 +638,7 @@ function homeBuckets(){
   const followToday = db.clients.filter(c => c.followUp===t);
   const followLate = db.clients.filter(isFollowLate);
   const waiting = act.filter(p => p.status==='reply' || p.status==='preview');
-  const openRevs = db.revisions.filter(r => REV_OPEN.includes(r.status) && act.some(p=>p.id===r.projectId));
+  const openRevs = db.revisions.filter(r => REV_OPEN.includes(r.status) && act.some(p=>p.id===r.projectId && !CLOSED.includes(p.status)));
   return {dueToday, late, followToday, followLate, waiting, openRevs};
 }
 function viewHome(){
@@ -744,7 +749,7 @@ function renderOrderResults(){
   if(ui.view==='table'){
     box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>المشروع</th><th>العميلة</th><th>الحالة</th><th>التسليم</th><th>التعديلات</th><th>الدفع</th><th>السعر</th></tr></thead><tbody>'+
       list.map(p => { const c = clientOf(p), ro = revOpenCount(p.id), rt = revsOf(p.id).length;
-        return '<tr data-open="'+p.id+'"><td><b>'+esc(p.title)+'</b> '+demoChip(p)+'<div class="muted small">'+esc(p.service)+'</div></td><td>'+esc(c.name)+'</td><td>'+statusSelect(p)+'</td><td>'+dueChip(p)+'</td><td class="num">'+(rt? (ro? '<span class="chip late">'+ro+' معلّق</span> ' : '')+'<span class="muted small">من '+rt+'</span>' : '<span class="muted">—</span>')+'</td><td>'+esc(PAYM[p.payment]||'—')+'</td><td class="num">'+money(p.price)+'</td></tr>'; }).join('')+
+        return '<tr data-open="'+p.id+'"><td><b>'+esc(p.title)+'</b> '+demoChip(p)+'<div class="muted small">'+esc(p.service)+'</div></td><td>'+esc(c.name)+'</td><td>'+statusSelect(p)+'</td><td>'+dueChip(p)+'</td><td class="num">'+(rt? (ro? '<span class="chip'+(CLOSED.includes(p.status)?'':' late')+'">'+ro+' معلّق</span> ' : '')+'<span class="muted small">من '+rt+'</span>' : '<span class="muted">—</span>')+'</td><td>'+esc(PAYM[p.payment]||'—')+'</td><td class="num">'+money(p.price)+'</td></tr>'; }).join('')+
       '</tbody></table></div>';
     return;
   }
@@ -762,9 +767,13 @@ function card(p){
   return '<article class="card'+(isOverdue(p)?' is-late':'')+(p.status==='cancelled'?' is-cancelled':'')+'" data-open="'+p.id+'">'+
     '<div class="row"><span class="muted small">'+esc(p.service)+'</span><span class="spacer"></span>'+demoChip(p)+'</div>'+
     '<h4>'+esc(p.title)+'</h4><span class="muted small">'+esc(c.name)+'</span>'+
-    '<div class="meta">'+dueChip(p)+(ro?'<span class="chip late">'+ro+' تعديل معلّق</span>':'')+(p.payment==='unpaid'?'<span class="chip">لم يُدفع</span>':'')+'</div>'+
+    '<div class="meta">'+dueChip(p)+(ro?'<span class="chip'+(CLOSED.includes(p.status)?'':' late')+'">'+ro+' تعديل معلّق</span>':'')+(p.payment==='unpaid'?'<span class="chip">لم يُدفع</span>':'')+'</div>'+
     '<div class="foot">'+statusSelect(p)+(next?'<button class="icon-btn" type="button" data-act="next-status" data-id="'+p.id+'" title="نقل إلى: '+next[1]+'" aria-label="نقل إلى: '+next[1]+'">'+I.next+'</button>':'')+'</div>'+
   '</article>';
+}
+function askCloseRevs(id, n){
+  confirmCb = () => { revsOf(id).filter(r=>REV_OPEN.includes(r.status)).forEach(r=>{ r.status='done'; if(!r.doneDate) r.doneDate = today(); r.updatedAt = nowIso(); }); logEvent(id, 'اعتُبرت التعديلات المفتوحة منفّذة عند اكتمال الطلب'); save('تم تحديث التعديلات'); render(); };
+  openSheet('الطلب مكتمل', '<div class="form"><p style="margin:0">في هذا الطلب '+(n===1?'تعديل واحد لم يُغلق':n+' تعديلات لم تُغلق')+'. تبين '+(n===1?'تعتبرينه':'تعتبرينها')+' «تم التنفيذ»؟</p><div class="form-actions"><button class="btn primary" type="button" data-act="confirm-ok">نعم، تم تنفيذها</button><button class="btn" type="button" data-act="close-sheet">اتركيها</button></div></div>');
 }
 function setStatus(id, st){
   const p = db.projects.find(x=>x.id===id); if(!p || p.status===st) return;
@@ -912,6 +921,7 @@ function viewDetail(id){
           '<datalist id="link-labels-d">'+LINK_LABELS.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
         '<div class="fact wide"><span class="k">متابعة العميلة</span><div class="followbox"><input type="date" data-change="follow" data-id="'+c.id+'" value="'+esc(c.followUp||'')+'" aria-label="موعد المتابعة">'+followChip(c)+'</div></div>'+
       '</div></section>'+
+      shareSection(p)+
       '<section class="panel"><h3>وصف الطلب الأصلي</h3><p class="prose '+(p.desc?'':'muted')+'" style="margin-top:6px">'+esc(p.desc||'لا يوجد وصف.')+'</p></section>'+
 
       '<section class="panel"><div class="section-head"><h3>سجل التعديلات</h3><button class="btn primary sm" type="button" data-act="add-rev" data-id="'+p.id+'">'+I.plus+'إضافة تعديل</button></div>'+
@@ -1052,6 +1062,33 @@ function readContentForm(f){
   setErr(f,'title',e1); setErr(f,'link',e2);
   if(e1||e2){ toast('راجعي الحقول المحدّدة بالأحمر','err'); return null; }
   return {title, link};
+}
+
+/* ========== Share order progress with the client ========== */
+function newShareToken(){ const a = new Uint8Array(15); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function trackUrl(p){
+  const c = syncCfg(); if(!p.shareToken || !c.url || !c.key) return '';
+  const base = location.href.split('#')[0].replace(/[^\/]*$/,'') + 'track.html#' + p.shareToken;
+  if(c.fixed) return base;
+  const m = c.url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co$/i);
+  const where = m ? m[1] : 'u:'+encodeURIComponent(c.url);
+  return location.href.split('#')[0].replace(/[^\/]*$/,'') + 'track.html#' + p.shareToken + '~' + where + '~' + c.key;
+}
+function shareSection(p){
+  const ready = sync.client && sync.session;
+  let body;
+  if(!ready) body = '<p class="small muted" style="margin:0">المشاركة تحتاج تفعيل المزامنة مع Supabase من الإعدادات، لأن العميلة تشوف آخر حالة من السحابة.</p><div><a class="btn sm" href="#settings">فتح الإعدادات</a></div>';
+  else if(!p.shareToken) body = '<p class="small" style="margin:0">أنشئي رابطًا خاصًا لهذا الطلب، والعميلة تشوف منه مراحل التنفيذ وتعديلاتها وموعد التسليم. ما تشوف السعر ولا ملاحظاتك.</p><div><button class="btn primary sm" type="button" data-act="share-on" data-id="'+p.id+'">'+I.link+'إنشاء رابط متابعة</button></div>';
+  else {
+    const url = trackUrl(p), c = clientOf(p);
+    const msg = 'أهلًا '+(c.name||'')+' 🌷\nتقدرين تتابعين سير طلبك «'+p.title+'» من هنا:\n'+url;
+    body = '<div class="share-link"><input id="share-url" readonly dir="ltr" value="'+esc(url)+'" aria-label="رابط المتابعة"><button class="btn sm" type="button" data-act="share-copy">نسخ</button></div>'+
+      '<div class="row">'+(c.num?'<a class="btn wa sm" href="'+esc(waUrl(c)+'?text='+encodeURIComponent(msg))+'" target="_blank" rel="noopener noreferrer">'+I.wa+'إرسال للعميلة</a>':'')+
+        '<a class="btn sm" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">معاينة صفحة العميلة</a></div>'+
+      '<label class="toggle" style="color:var(--ink)"><input type="checkbox" data-change="share-links" data-id="'+p.id+'"'+(p.shareLinks?' checked':'')+'> إظهار روابط المشروع للعميلة</label>'+
+      '<div class="row"><button class="btn ghost sm" type="button" data-act="share-renew" data-id="'+p.id+'">رابط جديد (يوقف القديم)</button><button class="btn ghost sm danger" type="button" data-act="share-off" data-id="'+p.id+'">إيقاف المشاركة</button></div>';
+  }
+  return '<section class="panel share-panel"><div class="section-head"><h3>مشاركة سير الطلب مع العميلة</h3>'+(p.shareToken?'<span class="chip ok">مفعّلة</span>':'')+'</div><div class="stack">'+body+'</div></section>';
 }
 
 /* ========== Clients ========== */
@@ -1281,7 +1318,7 @@ document.addEventListener('click', e => {
       case 'goto-filter': ui.status = a.dataset.status; ui.due = a.dataset.due; ui.q=''; ui.archived=false; go('orders'); break;
       case 'clear-filters': ui.status='all'; ui.due='all'; ui.q=''; render(); break;
       case 'view': ui.view = a.dataset.v; try{localStorage.setItem('reemstudio.view',ui.view);}catch(err){} render(); break;
-      case 'next-status': { e.stopPropagation(); const p = db.projects.find(x=>x.id===id); const i = STATUSES.findIndex(s=>s[0]===p.status); if(STATUSES[i+1] && !CLOSED.includes(p.status)){ setStatus(id, STATUSES[i+1][0]); renderOrderResults(); } break; }
+      case 'next-status': { e.stopPropagation(); const p = db.projects.find(x=>x.id===id); const i = STATUSES.findIndex(s=>s[0]===p.status); if(STATUSES[i+1] && !CLOSED.includes(p.status)){ const nx = STATUSES[i+1][0], openN = nx==='done' ? revsOf(id).filter(r=>REV_OPEN.includes(r.status)).length : 0; setStatus(id, nx); renderOrderResults(); if(openN) askCloseRevs(id, openN); } break; }
       case 'wa-from-form': {
         const f = $('#order-form'); const ph = normalizePhone(f.cc.value, f.phone.value); const err = phoneError(ph.cc, ph.num);
         setErr(f,'phone',err);
@@ -1320,6 +1357,9 @@ document.addEventListener('click', e => {
       case 'ct-toggle': { const c = db.content.find(x=>x.id===id); c[a.dataset.k] = !c[a.dataset.k]; c.updatedAt = nowIso(); save(); render(); break; }
       case 'ct-edit': openSheet('تعديل الفكرة', contentEditForm(db.content.find(x=>x.id===id))); break;
       case 'ct-del': { const c = db.content.find(x=>x.id===id); closeSheet(); confirmBox('حذف الفكرة؟','ستُحذف «'+c.title+'» من محتواي.','حذف',()=>{ db.content = db.content.filter(x=>x.id!==id); save('تم حذف الفكرة'); render(); }); break; }
+      case 'share-on': case 'share-renew': { const p = db.projects.find(x=>x.id===id); const renew = act==='share-renew'; p.shareToken = newShareToken(); touch(p); logEvent(p.id, renew?'أُنشئ رابط متابعة جديد وأُوقف القديم':'فُعّلت مشاركة سير الطلب مع العميلة'); save(renew?'تم إنشاء رابط جديد':'تم إنشاء رابط المتابعة'); scheduleSync(0); render(); break; }
+      case 'share-off': { const p = db.projects.find(x=>x.id===id); confirmBox('إيقاف المشاركة؟','الرابط اللي أرسلتيه للعميلة يتوقف عن العمل. تقدرين تنشئين رابطًا جديدًا لاحقًا.','إيقاف', ()=>{ p.shareToken = ''; touch(p); logEvent(p.id,'أُوقفت مشاركة سير الطلب'); save('تم إيقاف المشاركة'); scheduleSync(0); render(); }); break; }
+      case 'share-copy': { const inp = $('#share-url'); const done = ()=>toast('تم نسخ الرابط'); if(navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, ()=>{ inp.select(); toast('حدّدت الرابط، انسخيه يدويًا'); }); else { inp.select(); document.execCommand && document.execCommand('copy'); done(); } break; }
       case 'sync-now': syncNow(true); break;
       case 'sync-logout': confirmBox('تسجيل الخروج؟','تُمسح نسخة البيانات من هذا الجهاز فقط، وتبقى محفوظة في السحابة وتعود عند تسجيل الدخول مرة أخرى.','تسجيل الخروج', signOut); break;
       case 'sync-edit-config': ui.editSyncConfig = true; render(); break;
@@ -1341,9 +1381,10 @@ document.addEventListener('change', e => {
   if(el.name==='status' && el.form && el.form.id==='rev-form'){ if(['done','sent','approved'].includes(el.value) && !el.form.doneDate.value) el.form.doneDate.value = today(); return; }
   if(!k) return;
   const id = el.dataset.id;
-  if(k==='status'){ setStatus(id, el.value); if(route().name==='orders') renderOrderResults(); else render(); }
+  if(k==='status'){ const openN = el.value==='done' ? revsOf(id).filter(r=>REV_OPEN.includes(r.status)).length : 0; setStatus(id, el.value); if(openN) setTimeout(()=>askCloseRevs(id, openN), 0); if(route().name==='orders') renderOrderResults(); else render(); }
   else if(k==='payment'){ const p = db.projects.find(x=>x.id===id); p.payment = el.value; touch(p); logEvent(p.id,'الدفع: «'+PAYM[el.value]+'»'); save('تم تحديث حالة الدفع'); render(); }
   else if(k==='follow'){ const c = db.clients.find(x=>x.id===id); c.followUp = el.value; logEvent(null, el.value?'حُدّد موعد متابعة '+fmt(el.value):'أُزيل موعد المتابعة', c.id); save(el.value?'حُدّد موعد المتابعة':'أُزيل موعد المتابعة'); render(); }
+  else if(k==='share-links'){ const p = db.projects.find(x=>x.id===id); p.shareLinks = el.checked; touch(p); save(el.checked?'الروابط تظهر للعميلة':'الروابط مخفية عن العميلة'); }
   else if(k==='rev-status'){ const r = db.revisions.find(x=>x.id===id); const old = r.status; r.status = el.value; r.updatedAt = nowIso();
     if(['done','sent','approved'].includes(el.value) && !r.doneDate) r.doneDate = today();
     const no = revsOf(r.projectId).indexOf(r)+1;
@@ -1428,8 +1469,8 @@ const TABLES = [
     toRow:r=>({id:r.id,name:r.name||'',cc:r.cc||'966',num:r.num||'',follow_up:N(r.followUp),notes:r.notes||'',demo:!!r.demo,created_at:N(r.createdAt)}),
     fromRow:w=>({id:w.id,name:w.name,cc:w.cc,num:w.num,followUp:S(w.follow_up),notes:S(w.notes),demo:!!w.demo,createdAt:TS(w.created_at)})},
   {key:'projects', table:'projects',
-    toRow:p=>({id:p.id,client_id:p.clientId,title:p.title||'',service:p.service||'',description:p.desc||'',received:N(p.received),due:N(p.due),price:NUM(p.price),payment:p.payment||'unpaid',link:p.link||'',notes:p.notes||'',status:p.status||'new',archived:!!p.archived,completed_at:N(p.completedAt),demo:!!p.demo,created_at:N(p.createdAt),updated_at:N(p.updatedAt)}),
-    fromRow:w=>({id:w.id,clientId:w.client_id,title:w.title,service:w.service,desc:S(w.description),received:S(w.received),due:S(w.due),price:w.price===null?'':Number(w.price),payment:w.payment,link:S(w.link),notes:S(w.notes),status:w.status,archived:!!w.archived,completedAt:S(w.completed_at),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})},
+    toRow:p=>({id:p.id,client_id:p.clientId,title:p.title||'',service:p.service||'',description:p.desc||'',received:N(p.received),due:N(p.due),price:NUM(p.price),payment:p.payment||'unpaid',link:p.link||'',notes:p.notes||'',status:p.status||'new',archived:!!p.archived,share_token:N(p.shareToken),share_links:!!p.shareLinks,completed_at:N(p.completedAt),demo:!!p.demo,created_at:N(p.createdAt),updated_at:N(p.updatedAt)}),
+    fromRow:w=>({id:w.id,clientId:w.client_id,title:w.title,service:w.service,desc:S(w.description),received:S(w.received),due:S(w.due),price:w.price===null?'':Number(w.price),payment:w.payment,link:S(w.link),notes:S(w.notes),status:w.status,archived:!!w.archived,shareToken:S(w.share_token),shareLinks:!!w.share_links,completedAt:S(w.completed_at),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})},
   {key:'revisions', table:'revisions',
     toRow:r=>({id:r.id,project_id:r.projectId,description:r.desc||'',received:N(r.received),status:r.status||'new',done_date:N(r.doneDate),link:r.link||'',notes:r.notes||'',demo:!!r.demo,created_at:N(r.createdAt),updated_at:N(r.updatedAt)}),
     fromRow:w=>({id:w.id,projectId:w.project_id,desc:w.description,received:S(w.received),status:w.status,doneDate:S(w.done_date),link:S(w.link),notes:S(w.notes),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})},
