@@ -353,6 +353,19 @@ tbody tr:hover{background:var(--surface-2)}
 .share-link{display:flex;gap:8px}
 .share-link input{flex:1;min-width:0;font-size:13px;min-height:38px;color:var(--muted)}
 
+/* content: links, price, sold */
+.content-add .ct-links-field{grid-column:1/-1}
+@media (min-width:760px){.content-add{grid-template-columns:repeat(4,minmax(0,1fr))}.content-add .field[data-f=title]{grid-column:1/-1}.content-add>.btn{grid-column:1/-1;justify-self:start}}
+.ct-links-list{display:flex;flex-direction:column;gap:2px;margin-top:2px;min-width:0}
+.ct-links-list .ct-link{display:block}
+.ct-links-list .ct-link b{color:var(--ink);font-weight:600}
+.chip.price{color:var(--ink);background:var(--surface-2)}
+.sold-chip{cursor:pointer;font:inherit;font-size:12px;font-weight:600}
+.toolbar .seg{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.toolbar .seg::-webkit-scrollbar{display:none}
+.toolbar .seg button{white-space:nowrap;flex:0 0 auto}
+.portfolio-btn{font-family:var(--font-latin),var(--font-body);letter-spacing:.06em;color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+
 /* links */
 .links-box{display:flex;flex-direction:column;gap:8px}
 .link-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) auto;gap:8px;align-items:center}
@@ -429,7 +442,7 @@ const REV_STATUSES = [['new','جديد'],['progress','قيد التنفيذ'],['
 const REV = Object.fromEntries(REV_STATUSES);
 const REV_OPEN = ['new','progress'];
 const REV_ST_CLASS = {new:'st-revisions',progress:'st-progress',done:'st-ready',sent:'st-preview',approved:'st-done'};
-const SERVICES = ['موقع إلكتروني','مبادرة تعليمية','مبادرة','عرض تفاعلي','ملف إنجاز','ملف PDF','أسئلة','منصة','تصميم جرافيكي','أخرى'];
+const SERVICES = ['مبادرة','منصة','اختبار','تحضير','عروض','مراجعة','ألعاب','أخرى'];
 const CLOSED = ['done','cancelled'];
 const LINK_LABELS = ['المعاينة','الموقع المنشور','الملف النهائي','ملف PDF','ملفات التصميم','مجلد Drive'];
 const URL_RE = /^https?:\/\/\S+\.\S+/i;
@@ -797,7 +810,7 @@ function orderForm(p){
     '</fieldset>'+
     '<div class="fgrid">'+
       '<div class="field full" data-f="title"><label for="o-title">اسم المشروع <span class="req">*</span></label><input id="o-title" name="title" value="'+v('title')+'" required><span class="err"></span></div>'+
-      '<div class="field"><label for="o-service">نوع الخدمة</label><select id="o-service" name="service">'+opt(SERVICES, p?p.service:SERVICES[0])+'</select></div>'+
+      '<div class="field"><label for="o-service">نوع الخدمة</label><select id="o-service" name="service">'+opt(SERVICES.concat(p && p.service && !SERVICES.includes(p.service) ? [p.service] : []), p?p.service:SERVICES[0])+'</select></div>'+
       '<div class="field"><label for="o-status">الحالة</label><select id="o-status" name="status">'+opt(STATUSES, p?p.status:'new')+'</select></div>'+
       '<div class="field full"><label for="o-desc">وصف الطلب والتفاصيل المطلوبة</label><textarea id="o-desc" name="desc">'+v('desc')+'</textarea></div>'+
       '<div class="field"><label for="o-received">تاريخ استلام الطلب</label><input id="o-received" name="received" type="date" value="'+v('received', today())+'"></div>'+
@@ -1011,18 +1024,22 @@ ui.cq2 = ''; ui.cf = 'all';
 function viewContent(){
   const all = db.content, total = all.length;
   const none = all.filter(c=>!chDone(c)).length, full = all.filter(c=>chDone(c)===CH_KEYS.length).length;
-  const f = [['all','الكل',total],['none','لم تُنشر',none],['partial','ناقصة',total-none-full],['full','نُشرت في الكل',full]];
-  return '<div class="page-head"><div><h1>محتواي</h1><p class="muted small">أفكار المحتوى وأين نشرتِها</p></div></div>'+
+  const f = [['all','الكل',total],['none','لم تُنشر',none],['partial','ناقصة',total-none-full],['full','نُشرت في الكل',full],['sold','مباعة',all.filter(c=>c.sold).length],['unsold','غير مباعة',all.filter(c=>!c.sold).length]];
+  const soldN = all.filter(c=>c.sold).length, soldSum = all.filter(c=>c.sold).reduce((t,c)=>t+(Number(c.price)||0),0);
+  return '<div class="page-head"><div><h1>محتواي</h1><p class="muted small">أفكار المحتوى وأين نشرتِها'+(soldN?' · مباع '+soldN+' بمجموع <span class="num">'+money(soldSum)+'</span>':'')+'</p></div>'+
+      '<a class="btn portfolio-btn" href="portfolio.html" target="_blank" rel="noopener"><span dir="ltr">portfolio</span></a></div>'+
     (sync.missingContent ? '<div class="notice warn" style="margin-bottom:12px">'+I.alert+'<div>محتواي محفوظ على هذا الجهاز فقط حتى تشغّلي ملف التحديث <span class="ltr">reem-studio-update-content.sql</span> في Supabase.</div></div>' : '')+
     '<form class="panel content-add" id="content-form" novalidate>'+
       '<div class="field" data-f="title"><label for="ct-title">اسم الفكرة</label><input id="ct-title" name="title" autocomplete="off" placeholder="مثال: صفحة مبادرة القراءة"><span class="err"></span></div>'+
-      '<div class="field" data-f="link"><label for="ct-link">الرابط</label><input id="ct-link" name="link" type="url" inputmode="url" dir="ltr" placeholder="https://"><span class="err"></span></div>'+
+      '<div class="field ct-links-field" data-f="link"><span class="lbl">الروابط</span><div class="links-box ct-links">'+ctLinkRow({label:'',url:''})+'</div><button class="btn sm" type="button" data-act="ct-link-add" style="align-self:flex-start">'+I.plus+'رابط آخر</button><span class="err"></span></div>'+
+      '<div class="field" data-f="price"><label for="ct-price">سعر الموقع (ر.س)</label><input id="ct-price" name="price" inputmode="decimal" placeholder="اختياري"><span class="err"></span></div>'+
+      '<div class="field"><span class="lbl">مباع؟</span><div class="seg yn" role="radiogroup" aria-label="مباع؟"><button type="button" role="radio" data-act="ct-sold" data-v="1" aria-pressed="false">نعم</button><button type="button" role="radio" data-act="ct-sold" data-v="0" aria-pressed="true">لا</button></div></div>'+
       '<div class="field"><span class="lbl">تحتاج قاعدة بيانات؟</span><div class="seg yn" role="radiogroup" aria-label="تحتاج قاعدة بيانات؟"><button type="button" role="radio" data-act="ct-db" data-v="1" aria-pressed="false">نعم</button><button type="button" role="radio" data-act="ct-db" data-v="0" aria-pressed="true">لا</button></div></div>'+
       '<button class="btn primary" type="submit">'+I.plus+'إضافة الفكرة</button>'+
     '</form>'+
     '<div class="toolbar section"><label class="search">'+I.search+'<input type="search" id="cq2" placeholder="ابحثي باسم الفكرة" value="'+esc(ui.cq2)+'" aria-label="بحث في المحتوى"></label>'+
       '<div class="seg" role="group" aria-label="تصفية">'+f.map(([k,l,n])=>'<button type="button" data-act="ct-filter" data-v="'+k+'" aria-pressed="'+(ui.cf===k)+'">'+l+' <span class="num muted">'+n+'</span></button>').join('')+'</div></div>'+
-    '<div id="content-list"></div>';
+    '<div id="content-list"></div><datalist id="ct-link-labels"><option value="الموقع"><option value="المعاينة"><option value="نسخة ثانية"><option value="فيديو العرض"><option value="ملف PDF"></datalist>';
 }
 function renderContentList(){
   const box = $('#content-list'); if(!box) return;
@@ -1032,6 +1049,8 @@ function renderContentList(){
     if(ui.cf==='none' && d) return false;
     if(ui.cf==='partial' && (d===0 || d===CH_KEYS.length)) return false;
     if(ui.cf==='full' && d!==CH_KEYS.length) return false;
+    if(ui.cf==='sold' && !c.sold) return false;
+    if(ui.cf==='unsold' && c.sold) return false;
     return !q || c.title.toLowerCase().includes(q);
   }).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
   if(!db.content.length){ box.innerHTML = '<div class="panel"><div class="empty">'+I.emptyArt+'<b>لا توجد أفكار بعد</b><span>أضيفي أول فكرة من الأعلى، ثم علّمي على المنصات التي نشرتِها فيها.</span></div></div>'; return; }
@@ -1040,8 +1059,10 @@ function renderContentList(){
     const d = chDone(c);
     return '<article class="ct-card'+(d===CH_KEYS.length?' all':'')+'">'+
       '<div class="ct-top"><div class="grow" style="min-width:0"><h3>'+esc(c.title)+'</h3>'+
-        (c.link?'<a class="ct-link ltr" href="'+esc(c.link)+'" target="_blank" rel="noopener noreferrer">'+esc(c.link.replace(/^https?:\/\//,''))+'</a>':'<span class="muted small">بدون رابط</span>')+'</div>'+
+        (parseLinks(c.link).length?'<div class="ct-links-list">'+parseLinks(c.link).map(l=>'<a class="ct-link" href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer">'+(l.label?'<b>'+esc(l.label)+'</b> ':'')+'<span class="ltr">'+esc(l.url.replace(/^https?:\/\//,''))+'</span></a>').join('')+'</div>':'<span class="muted small">بدون رابط</span>')+'</div>'+
         '<button class="icon-btn" type="button" data-act="ct-edit" data-id="'+c.id+'" aria-label="تعديل الفكرة">'+I.edit+'</button></div>'+
+      '<div class="row">'+(c.price!==''&&c.price!=null?'<span class="chip price num">'+money(c.price)+'</span>':'<span class="chip">بدون سعر</span>')+
+        '<button type="button" class="chip sold-chip'+(c.sold?' ok':'')+'" data-act="ct-sold-toggle" data-id="'+c.id+'" aria-pressed="'+!!c.sold+'">'+(c.sold?'✓ مباع':'غير مباع')+'</button></div>'+
       '<div class="row"><span class="chip '+(c.needsDb?'today':'')+'">'+(c.needsDb?'تحتاج قاعدة بيانات':'بدون قاعدة بيانات')+'</span><span class="chip '+(d===CH_KEYS.length?'ok':'')+'"><span class="num">'+d+' / '+CH_KEYS.length+'</span>&nbsp;نُشرت</span>'+demoChip(c)+'</div>'+
       '<div class="ch-groups">'+CHANNELS.map(g=>'<div class="ch-group"><span class="ch-name">'+g.group+'</span><div class="ch-btns">'+g.items.map(([k,l])=>'<button type="button" class="ch'+(c[k]?' on':'')+'" data-act="ct-toggle" data-id="'+c.id+'" data-k="'+k+'" aria-pressed="'+!!c[k]+'"><span class="tick">'+(c[k]?'✓':'')+'</span>'+l+'</button>').join('')+'</div></div>').join('')+'</div>'+
     '</article>';
@@ -1050,18 +1071,26 @@ function renderContentList(){
 function contentEditForm(c){
   return '<form class="form" id="content-edit-form" novalidate data-id="'+c.id+'">'+
     '<div class="field" data-f="title"><label for="ce-title">اسم الفكرة</label><input id="ce-title" name="title" value="'+esc(c.title)+'"><span class="err"></span></div>'+
-    '<div class="field" data-f="link"><label for="ce-link">الرابط</label><input id="ce-link" name="link" type="url" dir="ltr" value="'+esc(c.link)+'" placeholder="https://"><span class="err"></span></div>'+
+    '<div class="field ct-links-field" data-f="link"><span class="lbl">الروابط</span><div class="links-box ct-links">'+(parseLinks(c.link).length?parseLinks(c.link):[{label:'',url:''}]).map(ctLinkRow).join('')+'</div><button class="btn sm" type="button" data-act="ct-link-add" style="align-self:flex-start">'+I.plus+'رابط آخر</button><span class="err"></span></div>'+
+    '<div class="fgrid"><div class="field" data-f="price"><label for="ce-price">سعر الموقع (ر.س)</label><input id="ce-price" name="price" inputmode="decimal" value="'+esc(c.price??'')+'"><span class="err"></span></div>'+
+    '<div class="field"><label for="ce-sold">مباع؟</label><select id="ce-sold" name="sold"><option value="1"'+(c.sold?' selected':'')+'>نعم</option><option value="0"'+(c.sold?'':' selected')+'>لا</option></select></div></div>'+
     '<div class="field"><label for="ce-db">تحتاج قاعدة بيانات؟</label><select id="ce-db" name="needsDb"><option value="1"'+(c.needsDb?' selected':'')+'>نعم</option><option value="0"'+(c.needsDb?'':' selected')+'>لا</option></select></div>'+
     '<div class="field"><label for="ce-notes">ملاحظات</label><textarea id="ce-notes" name="notes" style="min-height:70px">'+esc(c.notes||'')+'</textarea></div>'+
     '<div class="form-actions"><button class="btn primary" type="submit">حفظ</button><button class="btn danger" type="button" data-act="ct-del" data-id="'+c.id+'">حذف</button></div>'+
   '</form>';
 }
+function ctLinkRow(l){
+  return '<div class="link-row"><input name="ctLabel" list="ct-link-labels" placeholder="اسم الرابط (اختياري)" value="'+esc(l.label)+'" aria-label="اسم الرابط"><input name="ctUrl" type="url" inputmode="url" dir="ltr" placeholder="https://" value="'+esc(l.url)+'" aria-label="الرابط"><button class="icon-btn" type="button" data-act="ct-link-remove" aria-label="حذف الرابط">'+I.trash+'</button></div>';
+}
 function readContentForm(f){
-  const title = f.title.value.trim(), link = f.link.value.trim();
-  const e1 = title ? '' : 'اكتبي اسم الفكرة', e2 = (link && !URL_RE.test(link)) ? 'الرابط يجب أن يبدأ بـ https://' : '';
-  setErr(f,'title',e1); setErr(f,'link',e2);
-  if(e1||e2){ toast('راجعي الحقول المحدّدة بالأحمر','err'); return null; }
-  return {title, link};
+  const title = f.title.value.trim();
+  const L = [...f.querySelectorAll('[name=ctLabel]')].map(i=>i.value.trim()), U = [...f.querySelectorAll('[name=ctUrl]')].map(i=>i.value.trim());
+  const links = U.map((u,i)=>({label:L[i]||'', url:u})).filter(x=>x.url);
+  const pr = toLatinDigits(f.price.value).replace(/[,،\s]/g,'').trim();
+  const e1 = title ? '' : 'اكتبي اسم الفكرة', e2 = links.some(l=>!URL_RE.test(l.url)) ? 'كل رابط يجب أن يبدأ بـ https://' : '', e3 = (pr && isNaN(Number(pr))) ? 'اكتبي السعر أرقامًا فقط' : '';
+  setErr(f,'title',e1); setErr(f,'link',e2); setErr(f,'price',e3);
+  if(e1||e2||e3){ toast('راجعي الحقول المحدّدة بالأحمر','err'); return null; }
+  return {title, link: serializeLinks(links), price: pr ? Number(pr) : ''};
 }
 
 /* ========== Share order progress with the client ========== */
@@ -1352,6 +1381,10 @@ document.addEventListener('click', e => {
       case 'link-add': { const box = $('#links-box'); box.insertAdjacentHTML('beforeend', linkRow({label:'',url:''})); box.lastElementChild.querySelector('input').focus(); break; }
       case 'link-remove': { const row = a.closest('.link-row'); const box = row.parentElement; row.remove(); if(!box.children.length) box.insertAdjacentHTML('beforeend', linkRow({label:'',url:''})); break; }
       case 'link-del': { const p = db.projects.find(x=>x.id===id); const arr = parseLinks(p.link); const gone = arr.splice(+a.dataset.i,1)[0]; p.link = serializeLinks(arr); touch(p); logEvent(p.id,'حُذف رابط: '+(gone.label||gone.url)); save('تم حذف الرابط'); render(); break; }
+      case 'ct-sold': a.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b===a))); break;
+      case 'ct-sold-toggle': { const c = db.content.find(x=>x.id===id); c.sold = !c.sold; c.updatedAt = nowIso(); save(c.sold?'عُلّمت كمباعة':'عُلّمت كغير مباعة'); render(); break; }
+      case 'ct-link-add': { const box = a.parentElement.querySelector('.ct-links'); box.insertAdjacentHTML('beforeend', ctLinkRow({label:'',url:''})); box.lastElementChild.querySelector('input').focus(); break; }
+      case 'ct-link-remove': { const row = a.closest('.link-row'), box = row.parentElement; row.remove(); if(!box.children.length) box.insertAdjacentHTML('beforeend', ctLinkRow({label:'',url:''})); break; }
       case 'ct-db': a.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b===a))); break;
       case 'ct-filter': ui.cf = a.dataset.v; render(); break;
       case 'ct-toggle': { const c = db.content.find(x=>x.id===id); c[a.dataset.k] = !c[a.dataset.k]; c.updatedAt = nowIso(); save(); render(); break; }
@@ -1408,13 +1441,14 @@ document.addEventListener('submit', e => {
   if(f.id==='content-form'){
     const v = readContentForm(f); if(!v) return;
     const needsDb = f.querySelector('[data-act=ct-db][aria-pressed=true]').dataset.v==='1';
-    db.content.push(Object.assign({id:uid(), needsDb, notes:'', tiktok:false, tiktokStory:false, waStatus:false, igStory:false, igPost:false, createdAt:nowIso(), updatedAt:nowIso()}, v));
+    const sold = f.querySelector('[data-act=ct-sold][aria-pressed=true]').dataset.v==='1';
+    db.content.push(Object.assign({id:uid(), needsDb, sold, notes:'', tiktok:false, tiktokStory:false, waStatus:false, igStory:false, igPost:false, createdAt:nowIso(), updatedAt:nowIso()}, v));
     save('أُضيفت الفكرة'); render(); const t = $('#ct-title'); if(t) t.focus(); return;
   }
   if(f.id==='content-edit-form'){
     const v = readContentForm(f); if(!v) return;
     const c = db.content.find(x=>x.id===f.dataset.id);
-    Object.assign(c, v, {needsDb: f.needsDb.value==='1', notes: f.notes.value.trim(), updatedAt: nowIso()});
+    Object.assign(c, v, {needsDb: f.needsDb.value==='1', sold: f.sold.value==='1', notes: f.notes.value.trim(), updatedAt: nowIso()});
     save('تم حفظ الفكرة'); closeSheet(); render(); return;
   }
   if(f.id==='sync-config-form') submitSyncConfig(f);
@@ -1481,8 +1515,8 @@ const TABLES = [
     toRow:e=>({id:e.id,project_id:N(e.projectId),client_id:N(e.clientId),text:e.text||'',at:N(e.at)}),
     fromRow:w=>({id:w.id,projectId:w.project_id||null,clientId:w.client_id||null,text:w.text,at:TS(w.at)})},
   {key:'content', table:'content', optional:true,
-    toRow:c=>({id:c.id,title:c.title||'',link:c.link||'',needs_db:!!c.needsDb,tiktok:!!c.tiktok,tiktok_story:!!c.tiktokStory,wa_status:!!c.waStatus,ig_story:!!c.igStory,ig_post:!!c.igPost,notes:c.notes||'',demo:!!c.demo,created_at:N(c.createdAt),updated_at:N(c.updatedAt)}),
-    fromRow:w=>({id:w.id,title:w.title,link:S(w.link),needsDb:!!w.needs_db,tiktok:!!w.tiktok,tiktokStory:!!w.tiktok_story,waStatus:!!w.wa_status,igStory:!!w.ig_story,igPost:!!w.ig_post,notes:S(w.notes),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})}
+    toRow:c=>({id:c.id,title:c.title||'',link:c.link||'',price:NUM(c.price),sold:!!c.sold,needs_db:!!c.needsDb,tiktok:!!c.tiktok,tiktok_story:!!c.tiktokStory,wa_status:!!c.waStatus,ig_story:!!c.igStory,ig_post:!!c.igPost,notes:c.notes||'',demo:!!c.demo,created_at:N(c.createdAt),updated_at:N(c.updatedAt)}),
+    fromRow:w=>({id:w.id,title:w.title,link:S(w.link),price:w.price===null||w.price===undefined?'':Number(w.price),sold:!!w.sold,needsDb:!!w.needs_db,tiktok:!!w.tiktok,tiktokStory:!!w.tiktok_story,waStatus:!!w.wa_status,igStory:!!w.ig_story,igPost:!!w.ig_post,notes:S(w.notes),demo:!!w.demo,createdAt:TS(w.created_at),updatedAt:TS(w.updated_at)})}
 ];
 const sync = {client:null, session:null, status:'off', last:null, err:'', running:false, again:false, timer:null, channel:null};
 function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
