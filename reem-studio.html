@@ -1027,7 +1027,7 @@ function viewContent(){
   const f = [['all','الكل',total],['none','لم تُنشر',none],['partial','ناقصة',total-none-full],['full','نُشرت في الكل',full],['sold','مباعة',all.filter(c=>c.sold).length],['unsold','غير مباعة',all.filter(c=>!c.sold).length]];
   const soldN = all.filter(c=>c.sold).length, soldSum = all.filter(c=>c.sold).reduce((t,c)=>t+(Number(c.price)||0),0);
   return '<div class="page-head"><div><h1>محتواي</h1><p class="muted small">أفكار المحتوى وأين نشرتِها'+(soldN?' · مباع '+soldN+' بمجموع <span class="num">'+money(soldSum)+'</span>':'')+'</p></div>'+
-      '<a class="btn portfolio-btn" href="portfolio.html" target="_blank" rel="noopener"><span dir="ltr">portfolio</span></a></div>'+
+      '<div class="row head-links"><a class="btn portfolio-btn" href="portfolio.html" target="_blank" rel="noopener"><span dir="ltr">portfolio</span></a><a class="btn portfolio-btn" href="links.html" target="_blank" rel="noopener"><span dir="ltr">links</span></a></div></div>'+
     (sync.missingContent ? '<div class="notice warn" style="margin-bottom:12px">'+I.alert+'<div>محتواي محفوظ على هذا الجهاز فقط حتى تشغّلي ملف التحديث <span class="ltr">reem-studio-update-content.sql</span> في Supabase.</div></div>' : '')+
     '<form class="panel content-add" id="content-form" novalidate>'+
       '<div class="field" data-f="title"><label for="ct-title">اسم الفكرة</label><input id="ct-title" name="title" autocomplete="off" placeholder="مثال: صفحة مبادرة القراءة"><span class="err"></span></div>'+
