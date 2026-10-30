@@ -348,6 +348,15 @@ tbody tr:hover{background:var(--surface-2)}
 .tab span{white-space:nowrap}
 @media (max-width:420px){.tab{font-size:10.5px}}
 
+/* files */
+.file-pick{cursor:pointer}
+.files-list{display:flex;flex-direction:column;gap:6px}
+.file-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);min-width:0}
+.file-item a,.file-item .fname{flex:1;min-width:0;display:flex;flex-direction:column;text-decoration:none;color:var(--ink)}
+.file-item b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-item .li-ic{color:var(--icon);display:grid}.file-item .li-ic svg{width:18px;height:18px}
+.file-item .icon-btn{width:32px;height:32px;flex:0 0 32px}
+
 /* share */
 .share-panel{border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
 .share-link{display:flex;gap:8px}
@@ -632,7 +641,7 @@ function render(){
   document.querySelector('.fab').hidden = route().name==='content';
   const {name, id} = route();
   const m = $('#main');
-  if(name==='p') m.innerHTML = viewDetail(id);
+  if(name==='p'){ m.innerHTML = viewDetail(id); loadFiles(id); }
   else if(name==='orders'){ m.innerHTML = viewOrders(); renderOrderResults(); }
   else if(name==='clients'){ m.innerHTML = viewClients(); renderClientResults(); }
   else if(name==='calendar') m.innerHTML = viewCalendar();
@@ -934,6 +943,7 @@ function viewDetail(id){
           '<datalist id="link-labels-d">'+LINK_LABELS.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
         '<div class="fact wide"><span class="k">متابعة العميلة</span><div class="followbox"><input type="date" data-change="follow" data-id="'+c.id+'" value="'+esc(c.followUp||'')+'" aria-label="موعد المتابعة">'+followChip(c)+'</div></div>'+
       '</div></section>'+
+      filesSection(p)+
       shareSection(p)+
       '<section class="panel"><h3>وصف الطلب الأصلي</h3><p class="prose '+(p.desc?'':'muted')+'" style="margin-top:6px">'+esc(p.desc||'لا يوجد وصف.')+'</p></section>'+
 
@@ -1027,7 +1037,7 @@ function viewContent(){
   const f = [['all','الكل',total],['none','لم تُنشر',none],['partial','ناقصة',total-none-full],['full','نُشرت في الكل',full],['sold','مباعة',all.filter(c=>c.sold).length],['unsold','غير مباعة',all.filter(c=>!c.sold).length]];
   const soldN = all.filter(c=>c.sold).length, soldSum = all.filter(c=>c.sold).reduce((t,c)=>t+(Number(c.price)||0),0);
   return '<div class="page-head"><div><h1>محتواي</h1><p class="muted small">أفكار المحتوى وأين نشرتِها'+(soldN?' · مباع '+soldN+' بمجموع <span class="num">'+money(soldSum)+'</span>':'')+'</p></div>'+
-      '<div class="row head-links"><a class="btn portfolio-btn" href="portfolio.html" target="_blank" rel="noopener"><span dir="ltr">portfolio</span></a><a class="btn portfolio-btn" href="links.html" target="_blank" rel="noopener"><span dir="ltr">links</span></a></div></div>'+
+      '<a class="btn portfolio-btn" href="portfolio.html"><span dir="ltr">portfolio</span></a></div>'+
     (sync.missingContent ? '<div class="notice warn" style="margin-bottom:12px">'+I.alert+'<div>محتواي محفوظ على هذا الجهاز فقط حتى تشغّلي ملف التحديث <span class="ltr">reem-studio-update-content.sql</span> في Supabase.</div></div>' : '')+
     '<form class="panel content-add" id="content-form" novalidate>'+
       '<div class="field" data-f="title"><label for="ct-title">اسم الفكرة</label><input id="ct-title" name="title" autocomplete="off" placeholder="مثال: صفحة مبادرة القراءة"><span class="err"></span></div>'+
@@ -1118,6 +1128,66 @@ function shareSection(p){
       '<div class="row"><button class="btn ghost sm" type="button" data-act="share-renew" data-id="'+p.id+'">رابط جديد (يوقف القديم)</button><button class="btn ghost sm danger" type="button" data-act="share-off" data-id="'+p.id+'">إيقاف المشاركة</button></div>';
   }
   return '<section class="panel share-panel"><div class="section-head"><h3>مشاركة سير الطلب مع العميلة</h3>'+(p.shareToken?'<span class="chip ok">مفعّلة</span>':'')+'</div><div class="stack">'+body+'</div></section>';
+}
+
+/* ========== Order files (private Supabase Storage) ========== */
+const FILE_BUCKET = 'order-files', FILE_MAX = 50*1024*1024;
+const b64u = str => { const b = new TextEncoder().encode(str); let s = ''; b.forEach(x=>s+=String.fromCharCode(x)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+const unb64u = s => { try{ const bin = atob(s.replace(/-/g,'+').replace(/_/g,'/')); return new TextDecoder().decode(Uint8Array.from(bin, c=>c.charCodeAt(0))); }catch(e){ return ''; } };
+function fileKey(file){
+  const m = file.name.match(/(\.[a-z0-9]{1,8})$/i), ext = m ? m[1].toLowerCase() : '';
+  const base = ext ? file.name.slice(0, -ext.length) : file.name;
+  return Date.now() + '-' + Math.random().toString(36).slice(2,6) + '~' + b64u(base.slice(0,120)) + ext;
+}
+function fileLabel(key){ const i = key.indexOf('~'); if(i<0) return key; const rest = key.slice(i+1), m = rest.match(/(\.[a-z0-9]{1,8})$/i), ext = m ? m[1] : ''; return (unb64u(ext ? rest.slice(0,-ext.length) : rest) || 'ملف') + ext; }
+function fileSize(n){ if(!n && n!==0) return ''; if(n<1024) return n+' بايت'; if(n<1048576) return (n/1024).toFixed(0)+' كيلوبايت'; return (n/1048576).toFixed(1)+' ميجابايت'; }
+function filesPrefix(pid){ return sync.session.user.id + '/' + pid; }
+function filesSection(p){
+  const ready = sync.client && sync.session;
+  return '<section class="panel files-panel"><div class="section-head"><h3>ملفات الطلب</h3>'+
+    (ready?'<label class="btn primary sm file-pick">'+I.plus+'إضافة ملف<input type="file" id="file-input" data-id="'+p.id+'" multiple hidden></label>':'')+'</div>'+
+    (ready ? '<div id="files-list" class="files-list"><p class="muted small" style="margin:0">جارٍ تحميل الملفات…</p></div>'
+           : '<p class="small muted" style="margin:0">رفع الملفات يحتاج تسجيل الدخول للمزامنة من الإعدادات، لأن الملفات تُحفظ في السحابة.</p>')+
+  '</section>';
+}
+async function loadFiles(pid){
+  const box = $('#files-list'); if(!box || !sync.client || !sync.session) return;
+  try{
+    const {data, error} = await sync.client.storage.from(FILE_BUCKET).list(filesPrefix(pid), {limit:200, sortBy:{column:'created_at', order:'desc'}});
+    if(error) throw error;
+    const files = (data||[]).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
+    if(!$('#files-list') || route().id !== pid) return;
+    if(!files.length){ box.innerHTML = '<p class="muted small" style="margin:0">لا توجد ملفات. أضيفي ملفات العميلة أو التصاميم أو العقد هنا.</p>'; return; }
+    const paths = files.map(f => filesPrefix(pid)+'/'+f.name);
+    const signed = await sync.client.storage.from(FILE_BUCKET).createSignedUrls(paths, 3600);
+    const urls = {}; (signed.data||[]).forEach(x => { if(x && x.signedUrl) urls[x.path] = x.signedUrl; });
+    box.innerHTML = files.map((f,i) => {
+      const path = paths[i], name = fileLabel(f.name), url = urls[path] || '';
+      return '<div class="file-item"><span class="li-ic">'+I.archive+'</span>'+
+        (url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">':'<span class="fname">')+'<b>'+esc(name)+'</b><span class="muted small">'+esc([fileSize(f.metadata && f.metadata.size), f.created_at ? fmtTime(f.created_at) : ''].filter(Boolean).join(' · '))+'</span>'+(url?'</a>':'</span>')+
+        '<button class="icon-btn" type="button" data-act="file-del" data-id="'+pid+'" data-path="'+esc(path)+'" data-name="'+esc(name)+'" aria-label="حذف الملف">'+I.trash+'</button></div>';
+    }).join('');
+  }catch(e){
+    const m = String(e && e.message || e);
+    box.innerHTML = '<p class="small" style="margin:0;color:var(--danger)">'+(/bucket|not found/i.test(m) ? 'مخزن الملفات غير موجود. شغّلي ملف التحديث reem-studio-update-files.sql في Supabase.' : 'تعذّر تحميل الملفات: '+esc(m))+'</p>';
+  }
+}
+async function uploadFiles(pid, list){
+  const p = db.projects.find(x=>x.id===pid); if(!p || !sync.session) return;
+  const files = [...list]; let ok = 0;
+  for(const f of files){
+    if(f.size > FILE_MAX){ toast('«'+f.name+'» أكبر من 50 ميجابايت','err'); continue; }
+    toast('جارٍ رفع «'+f.name+'»…');
+    const {error} = await sync.client.storage.from(FILE_BUCKET).upload(filesPrefix(pid)+'/'+fileKey(f), f, {contentType: f.type || 'application/octet-stream', upsert:false});
+    if(error){ toast(/bucket|not found/i.test(error.message) ? 'مخزن الملفات غير موجود. شغّلي ملف التحديث في Supabase.' : 'تعذّر رفع «'+f.name+'»: '+error.message, 'err'); continue; }
+    ok++; logEvent(pid, 'أُرفق ملف: '+f.name);
+  }
+  if(ok){ touch(p); save(ok===1 ? 'تم رفع الملف' : 'تم رفع '+ok+' ملفات'); }
+  loadFiles(pid);
+}
+async function removeOrderFiles(pid){
+  if(!sync.client || !sync.session) return;
+  try{ const {data} = await sync.client.storage.from(FILE_BUCKET).list(filesPrefix(pid), {limit:1000}); const paths = (data||[]).map(f=>filesPrefix(pid)+'/'+f.name); if(paths.length) await sync.client.storage.from(FILE_BUCKET).remove(paths); }catch(e){}
 }
 
 /* ========== Clients ========== */
@@ -1358,7 +1428,7 @@ document.addEventListener('click', e => {
       case 'archive': { const p = db.projects.find(x=>x.id===id); p.archived = !p.archived; touch(p); logEvent(p.id, p.archived?'أُرشف المشروع':'أُلغيت أرشفة المشروع'); save(p.archived?'تمت أرشفة المشروع':'أُعيد المشروع للطلبات'); render(); break; }
       case 'delete-order': { const p = db.projects.find(x=>x.id===id); confirmBox('حذف الطلب؟','سيُحذف «'+p.title+'» مع كل تعديلاته ومهامه وسجله نهائيًا. إن أردتِ إخفاءه فقط فاستخدمي الأرشفة.','حذف نهائي',()=>{
           db.projects = db.projects.filter(x=>x.id!==id); db.revisions = db.revisions.filter(r=>r.projectId!==id); db.tasks = db.tasks.filter(t=>t.projectId!==id); db.events = db.events.filter(ev=>ev.projectId!==id);
-          save('تم حذف الطلب'); go('orders'); }); break; }
+          save('تم حذف الطلب'); removeOrderFiles(id); go('orders'); }); break; }
       case 'add-rev': openSheet('إضافة تعديل', revForm(id, null)); break;
       case 'edit-rev': { const r = db.revisions.find(x=>x.id===id); openSheet('تفاصيل التعديل', revForm(r.projectId, r)); break; }
       case 'del-rev': { const r = db.revisions.find(x=>x.id===id); closeSheet(); confirmBox('حذف هذا التعديل؟','سيُحذف من سجل التعديلات نهائيًا.','حذف',()=>{ db.revisions = db.revisions.filter(x=>x.id!==id); logEvent(r.projectId,'حُذف تعديل من السجل'); save('تم حذف التعديل'); render(); }); break; }
@@ -1393,6 +1463,7 @@ document.addEventListener('click', e => {
       case 'share-on': case 'share-renew': { const p = db.projects.find(x=>x.id===id); const renew = act==='share-renew'; p.shareToken = newShareToken(); touch(p); logEvent(p.id, renew?'أُنشئ رابط متابعة جديد وأُوقف القديم':'فُعّلت مشاركة سير الطلب مع العميلة'); save(renew?'تم إنشاء رابط جديد':'تم إنشاء رابط المتابعة'); scheduleSync(0); render(); break; }
       case 'share-off': { const p = db.projects.find(x=>x.id===id); confirmBox('إيقاف المشاركة؟','الرابط اللي أرسلتيه للعميلة يتوقف عن العمل. تقدرين تنشئين رابطًا جديدًا لاحقًا.','إيقاف', ()=>{ p.shareToken = ''; touch(p); logEvent(p.id,'أُوقفت مشاركة سير الطلب'); save('تم إيقاف المشاركة'); scheduleSync(0); render(); }); break; }
       case 'share-copy': { const inp = $('#share-url'); const done = ()=>toast('تم نسخ الرابط'); if(navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, ()=>{ inp.select(); toast('حدّدت الرابط، انسخيه يدويًا'); }); else { inp.select(); document.execCommand && document.execCommand('copy'); done(); } break; }
+      case 'file-del': { const path = a.dataset.path, name = a.dataset.name; confirmBox('حذف الملف؟','سيُحذف «'+name+'» نهائيًا من ملفات الطلب.','حذف', async ()=>{ const {error} = await sync.client.storage.from(FILE_BUCKET).remove([path]); if(error){ toast('تعذّر حذف الملف: '+error.message,'err'); return; } logEvent(id,'حُذف ملف: '+name); save('تم حذف الملف'); render(); }); break; }
       case 'sync-now': syncNow(true); break;
       case 'sync-logout': confirmBox('تسجيل الخروج؟','تُمسح نسخة البيانات من هذا الجهاز فقط، وتبقى محفوظة في السحابة وتعود عند تسجيل الدخول مرة أخرى.','تسجيل الخروج', signOut); break;
       case 'sync-edit-config': ui.editSyncConfig = true; render(); break;
@@ -1410,6 +1481,7 @@ document.addEventListener('change', e => {
   if(el.id==='f-status'){ ui.status = el.value; renderOrderResults(); return; }
   if(el.id==='f-due'){ ui.due = el.value; renderOrderResults(); return; }
   if(el.id==='f-arch'){ ui.archived = el.checked; renderOrderResults(); return; }
+  if(el.id==='file-input'){ if(el.files.length) uploadFiles(el.dataset.id, el.files); el.value=''; return; }
   if(el.id==='import-file'){ if(el.files[0]) importData(el.files[0]); el.value=''; return; }
   if(el.name==='status' && el.form && el.form.id==='rev-form'){ if(['done','sent','approved'].includes(el.value) && !el.form.doneDate.value) el.form.doneDate.value = today(); return; }
   if(!k) return;

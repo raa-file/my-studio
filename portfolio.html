@@ -393,8 +393,7 @@ window.CATEGORIES = [
   { id: "prep",          label: "مساعد التحضير",         short: "التحضير", note: "أدوات تختصر على المعلمة وقت التحضير." },
   { id: "presentations", label: "العروض التفاعلية",      short: "عروض",    note: "عروض دروس تفاعلية بدل الشرائح الثابتة." },
   { id: "review",        label: "المراجعة التفاعلية",    short: "مراجعة",  note: "ألعاب مراجعة تسبق الاختبار وتثبّت الدرس." },
-  { id: "games",         label: "الألعاب",               short: "ألعاب",   note: "ألعاب تعليمية وترفيهية للصغار والكبار." },
-  { id: "other",         label: "أعمال أخرى",            short: "أخرى",    note: "مواقع ومدونات وأدوات صممتها وبرمجتها خارج الفصل." }
+  { id: "games",         label: "الألعاب",               short: "ألعاب",   note: "ألعاب تعليمية وترفيهية للصغار والكبار." }
 ];
 
 window.PROJECTS = [
@@ -421,7 +420,7 @@ window.PROJECTS = [
     summary: "تحدي شرب الماء بقارورة تمتلئ تفاعليًا، وأوسمة ونصيحة يومية." },
   { slug: "learning-for-life", title: "التعلم للحياة", category: "initiatives", subtitle: "ترشيد استهلاك الماء",
     summary: "مبادرة ترشيد استهلاك الماء بصفحة تفاعلية." },
-  { slug: "math-code", link: "https://raa-file.github.io/math/", title: "شفرة الرياضيات", category: "initiatives",
+  { slug: "math-code", link: "https://raa-file.github.io/math/math-code.html", title: "شفرة الرياضيات", category: "initiatives",
     summary: "ألغاز رياضيات بمراحل وأقفال وشهادة ختامية للصف الثاني المتوسط." },
   { slug: "mawaqif", link: "https://raa-file.github.io/mawaqif/mawaqif.html", title: "مواقف تصنع القيم", category: "initiatives",
     summary: "مواقف يومية وتحدٍّ أسبوعي وأوسمة ولوحة للفصل." },
@@ -431,14 +430,8 @@ window.PROJECTS = [
     summary: "بناء دوائر، تحدي الحركة، القوى، ومستويات ألغاز وتحديات أسبوعية." },
   { slug: "qararat", link: "https://raa-file.github.io/qararat-logo/", title: "قرارات تصنع حياتي", category: "initiatives",
     summary: "تحدي الميزانية، مواقف يومية، المطبخ الذكي، ومخطط الأسبوع." },
-  { slug: "reading-journey", link: "https://raa-file.github.io/reading/", title: "رحلة قارئة", category: "initiatives", subtitle: "مبادرة القراءة",
+  { slug: "reading-journey", title: "رحلة قارئة", category: "initiatives", subtitle: "مبادرة القراءة",
     summary: "مبادرة قراءة مدرسية بصفحة تفاعلية تُعرض على إدارة المدرسة." },
-  { slug: "reading-journey-en", link: "https://111reemalhrbi.github.io/Ee/", title: "رحلة قارئة", category: "initiatives", subtitle: "النسخة الإنجليزية",
-    summary: "رحلة القراءة بالإنجليزي للطالبات." },
-  { slug: "reading-stars", link: "https://raa-file.github.io/jour/", title: "نجوم القراءة", category: "initiatives", subtitle: "مبادرة القراءة",
-    summary: "نسخة النجوم من مبادرة القراءة: كل قراءة تضيف نجمة لرحلة الطالبة." },
-  { slug: "reading-stars-2", link: "https://raa-file.github.io/journey/", title: "نجوم القراءة ٢", category: "initiatives", subtitle: "مبادرة القراءة",
-    summary: "نسخة ثانية من نجوم القراءة." },
   { slug: "safirat-alqiyam", link: "https://raa-file.github.io/Honesty/", title: "سفيرات القيم", category: "initiatives", subtitle: "بالصدق نرتقي",
     summary: "جدار قصص واستبيان ولوحة للمعلمة حول قيمة الصدق." },
   { slug: "smart-plate", link: "https://raa-file.github.io/smart-plate/", title: "الطبق الذكي", category: "initiatives",
@@ -458,33 +451,14 @@ window.PROJECTS = [
   { slug: "school-bus", link: "https://raa-file.github.io/school-bus/", title: "النقل المدرسي", category: "platforms", subtitle: "منصة الباص",
     summary: "الحافلات والمشرفات وحضور الطالبات، ولوحة للإدارة وتقارير للطباعة." },
 
-  { slug: "student-tracker", link: "https://raa-file.github.io/Student/", title: "سجل المتابعة", category: "platforms",
-    summary: "متابعة الحضور والمشاركة والواجبات والدرجات لكل طالبة." },
-  { slug: "student-followup", link: "https://raa-file.github.io/Student-followup/", title: "سجل الطلاب", category: "platforms",
-    summary: "سجل لمتابعة الطالبات وتنظيم بياناتهن." },
-  { slug: "reading-library", link: "https://raa-file.github.io/reading-library/", title: "قارئاتي الصغيرات", category: "platforms",
-    summary: "مكتبة قصص بمستويات وتسجيل صوتي وتحديات ونجوم ولوحة للمعلمة." },
-  { slug: "manara", link: "https://excellencepath.github.io/manara/", title: "منارة", category: "platforms",
-    summary: "منصة منارة." },
-  { slug: "perf-evidence", link: "https://excellencepath.github.io/PerfEv/", title: "منصة شواهد الأداء", category: "platforms",
-    summary: "منصة لتنظيم شواهد الأداء الوظيفي للمعلمات." },
-  { slug: "pix", link: "https://raa-file.github.io/Pix/", title: "منصة بيكس", category: "other", subtitle: "Pix",
-    summary: "منصة فريق المحتوى: بنك أفكار، دعوات تصوير، وتقويم الجلسات." },
-  { slug: "matcha-blog", link: "https://raa-file.github.io/matcha/", title: "مدونة ماتشا", category: "other",
-    summary: "مدونة بتصميم خاص عن الماتشا." },
-
   /* ---------- الاختبارات الإلكترونية ---------- */
   { slug: "exam-platform", link: "https://raa-file.github.io/reem/", title: "التقييم الإلكتروني", category: "tests",
     summary: "اختبارات إلكترونية تُحل من الجوال وتُجمع نتائجها في مكان واحد." },
   { slug: "listening-quiz", title: "اختبار الاستماع", category: "tests",
     summary: "اختبارات استماع تفاعلية تُحل من أي جهاز." },
-  { slug: "grammar-quiz", link: "https://excellencepath.github.io/grammar-quiz/", title: "اختبار القواعد", category: "tests",
-    summary: "اختبار قواعد إلكتروني يُحل من الجوال." },
-  { slug: "math-quiz", link: "https://raa-file.github.io/quiz/", title: "اختبار الرياضيات", category: "tests",
-    summary: "اختبار رياضيات إلكتروني تظهر نتيجته مباشرة." },
 
   /* ---------- مساعد التحضير ---------- */
-  { slug: "teacher-tasks", link: "https://raa-file.github.io/Tasks/", title: "دفتر المعلمة", category: "prep", subtitle: "مهام المعلمة",
+  { slug: "teacher-tasks", link: "https://raa-file.github.io/Tasks/", title: "مهام المعلمة", category: "prep",
     summary: "مهام المعلمة منظّمة في صفحة واحدة." },
   { slug: "video-guide", link: "https://raa-file.github.io/geography/", title: "دليل الفيديوهات وأوراق العمل", category: "prep", subtitle: "الاجتماعيات أول متوسط",
     summary: "لكل درس فيديو إثرائي وورقة عمل تفاعلية." },
@@ -494,16 +468,14 @@ window.PROJECTS = [
   /* ---------- العروض التفاعلية ---------- */
   { slug: "chemical-reactions", link: "https://raa-file.github.io/Interactions/", title: "تصنيف التفاعلات الكيميائية", category: "presentations", subtitle: "كيمياء ١",
     summary: "عرض تفاعلي لدرس تصنيف التفاعلات الكيميائية." },
-  { slug: "quran-presentation", link: "https://111reemalhrbi.github.io/-Lesson-Slides/", title: "عرض القرآن الكريم", category: "presentations",
+  { slug: "quran-presentation", title: "عرض القرآن الكريم", category: "presentations",
     summary: "عرض تفاعلي لدرس القرآن الكريم، ومنه شريحة آداب التلاوة." },
   { slug: "math-presentation", title: "عرض الرياضيات", category: "presentations",
     summary: "عرض تفاعلي لدرس الرياضيات." },
-  { slug: "english-presentation-1", link: "https://111reemalhrbi.github.io/English-Lesson-/", title: "عرض الإنجليزي ١", category: "presentations",
+  { slug: "english-presentation-1", title: "عرض الإنجليزي ١", category: "presentations",
     summary: "عرض تفاعلي لدرس اللغة الإنجليزية." },
   { slug: "english-presentation-2", title: "عرض الإنجليزي ٢", category: "presentations",
     summary: "عرض تفاعلي ثانٍ لدرس اللغة الإنجليزية." },
-  { slug: "heart-3d", link: "https://raa-file.github.io/heart/", title: "القلب", category: "presentations", subtitle: "مجسم تفاعلي",
-    summary: "نموذج ثلاثي الأبعاد للقلب بنقاط تفاعلية تشرح كل جزء بالعربي والإنجليزي." },
 
   /* ---------- المراجعة التفاعلية ---------- */
   { slug: "human-body", title: "أسرار جسم الإنسان", category: "review",
@@ -514,9 +486,9 @@ window.PROJECTS = [
     summary: "مراجعة المعادلات ذات الخطوة الواحدة في أربع مراحل و٤٠٠ نقطة." },
 
   /* ---------- الألعاب ---------- */
-  { slug: "categories-game", link: "https://raa-file.github.io/game/", title: "إنسان حيوان نبات جماد", category: "games", subtitle: "إنسان حيوان نبات جماد بلاد",
+  { slug: "categories-game", title: "إنسان حيوان نبات جماد", category: "games", subtitle: "إنسان حيوان نبات جماد بلاد",
     summary: "اللعبة الشهيرة جماعية وبالعربي، يلعبها الجميع في الوقت نفسه." },
-  { slug: "arabic-wordle", link: "https://raa-file.github.io/wordle/", title: "خمّن الكلمة", category: "games", subtitle: "Wordle عربي",
+  { slug: "arabic-wordle", title: "خمّن الكلمة", category: "games", subtitle: "Wordle عربي",
     summary: "خمّن الكلمة العربية في محاولات محدودة." },
   { slug: "coloring-game", title: "لعبة التلوين", category: "games",
     summary: "لعبة تلوين تفاعلية للأطفال الصغار." },
@@ -525,17 +497,7 @@ window.PROJECTS = [
   { slug: "chem-memory", title: "ذاكرة الكيمياء", category: "games",
     summary: "لعبة ذاكرة لمراجعة مفاهيم الكيمياء." },
   { slug: "hajj-crossword", title: "كلمات الحج المتقاطعة", category: "games",
-    summary: "كلمات متقاطعة تفاعلية بموضوع الحج." },
-  { slug: "feelings-colors", link: "https://raa-file.github.io/colors/", title: "مشاعري ألوان", category: "games",
-    summary: "نشاط تفاعلي يربط المشاعر بالألوان." },
-
-  /* ---------- أعمال أخرى ---------- */
-  { slug: "shumoo-blog", link: "https://raa-file.github.io/blog/", title: "مدونة شموع", category: "other",
-    summary: "مدونة شموع." },
-  { slug: "order-book", link: "https://raa-file.github.io/order-book/", title: "دفتر الطلبات", category: "other",
-    summary: "تطبيق لتنظيم طلبات العملاء ومتابعة حالتها حتى التسليم." },
-  { slug: "keyboard", link: "https://raa-file.github.io/keyboard/", title: "كيبورد", category: "other",
-    summary: "موقع كيبورد تفاعلي." },
+    summary: "كلمات متقاطعة تفاعلية بموضوع الحج." }
 ];
 
 </script>
@@ -914,5 +876,11 @@ window.PROJECTS = [
   if (document.fonts && document.fonts.ready) Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]).then(start); else start();
 })();
 </script>
+<a class="studio-back" href="reem-studio.html#content" aria-label="العودة إلى الاستوديو"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg><span>الاستوديو</span></a>
+<style>
+.studio-back{position:fixed;z-index:9999;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:calc(16px + env(safe-area-inset-right,0px));display:inline-flex;align-items:center;gap:6px;padding:9px 16px 9px 14px;border-radius:999px;background:var(--rose,#E0447A);color:#fff;font:600 14px/1 "Alexandria",system-ui,sans-serif;text-decoration:none;box-shadow:0 6px 18px rgba(70,20,45,.25)}
+.studio-back:focus-visible{outline:2px solid var(--ink,#1F1A1D);outline-offset:3px}
+@media (prefers-color-scheme: dark){.studio-back{color:#1B1619}}
+</style>
 </body>
 </html>
